@@ -12,6 +12,10 @@ Handles chat commands from other mods.
 
 Easy gathering and fishing.
 
+## Faster Movement Speed
+
+Faster movement speed.
+
 ## Toggle Debug Mode
 
 Commands that affect the debug mode.

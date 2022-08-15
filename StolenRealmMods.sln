@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyGathering", "EasyGather
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToggleDebugMode", "ToggleDebugMode\ToggleDebugMode.csproj", "{0AC2D1DE-5FA6-408A-B0EE-0214749E54CE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FasterMovementSpeed", "FasterMovementSpeed\FasterMovementSpeed.csproj", "{1A75D2CC-9B06-4E89-A673-FF100802AE0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{0AC2D1DE-5FA6-408A-B0EE-0214749E54CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AC2D1DE-5FA6-408A-B0EE-0214749E54CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AC2D1DE-5FA6-408A-B0EE-0214749E54CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A75D2CC-9B06-4E89-A673-FF100802AE0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A75D2CC-9B06-4E89-A673-FF100802AE0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A75D2CC-9B06-4E89-A673-FF100802AE0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A75D2CC-9B06-4E89-A673-FF100802AE0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
