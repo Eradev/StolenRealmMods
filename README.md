@@ -23,7 +23,11 @@ Easy gathering and fishing.
 
 ## Faster Movement Speed
 
-Faster movement speed.
+Configurable movement speed multiplier.
+
+## Skill Points
+
+Configurable skill points per level.
 
 ## Toggle Debug Mode
 

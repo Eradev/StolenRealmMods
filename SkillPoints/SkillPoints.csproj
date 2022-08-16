@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>eradev.stolenrealm.FasterMovementSpeed</AssemblyName>
-    <Description>Configurable movement speed multiplier.</Description>
+    <AssemblyName>eradev.stolenrealm.SkillPoints</AssemblyName>
+    <Description>Configurable skill points per level.</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
-    <RootNamespace>eradev.stolenrealm.FasterMovementSpeed</RootNamespace>
+    <RootNamespace>eradev.stolenrealm.SkillPoints</RootNamespace>
     <Authors>eradev</Authors>
-    <Product>Faster Movement Speed</Product>
+    <Product>Skill Points</Product>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,9 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   
