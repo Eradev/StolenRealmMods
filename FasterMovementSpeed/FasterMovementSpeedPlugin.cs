@@ -32,7 +32,7 @@ namespace eradev.stolenrealm.FasterMovementSpeed
             }
 
             _cmdSet = Config.Bind("Commands", "set", CmdSetDefault, "[Args (float, min 1.0)] Set the movement speed multiplier");
-            _cmdToggle = Config.Bind("Commands", "toggle", CmdToggleDefault, "Toggle the debug mode");
+            _cmdToggle = Config.Bind("Commands", "toggle", CmdToggleDefault, $"Toggle {PluginInfo.PLUGIN_NAME} on/off");
 
             CommandHandler.RegisterCommandsEvt += (_, _) =>
             {
