@@ -14,7 +14,7 @@ namespace eradev.stolenrealm.SkillPoints
     public class SkillPointsPlugin : BaseUnityPlugin
     {
         private const string CmdSetDefault = "set_spl";
-        private const float SkillPointsPerLevelDefault = 2.0f;
+        private const float SkillPointsPerLevelDefault = 1.0f;
 
         private static ConfigEntry<string> _cmdSet;
         private static ConfigEntry<float> _skillPointsPerLevel;
