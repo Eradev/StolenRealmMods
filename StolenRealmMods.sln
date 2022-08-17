@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterMessageWindow", "Bett
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillPoints", "SkillPoints\SkillPoints.csproj", "{8208AE18-16CC-41A4-B5CC-A608B1635363}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReplayQuests", "ReplayQuests\ReplayQuests.csproj", "{5DF78445-CBC2-4156-8433-EEA3E507AC99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{8208AE18-16CC-41A4-B5CC-A608B1635363}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8208AE18-16CC-41A4-B5CC-A608B1635363}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8208AE18-16CC-41A4-B5CC-A608B1635363}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DF78445-CBC2-4156-8433-EEA3E507AC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DF78445-CBC2-4156-8433-EEA3E507AC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DF78445-CBC2-4156-8433-EEA3E507AC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DF78445-CBC2-4156-8433-EEA3E507AC99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

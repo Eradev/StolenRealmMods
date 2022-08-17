@@ -25,6 +25,10 @@ Easy gathering and fishing.
 
 Configurable movement speed multiplier.
 
+## Replay Quests
+
+Allows for completed quests to be replayed.
+
 ## Skill Points
 
 Configurable skill points per level.
