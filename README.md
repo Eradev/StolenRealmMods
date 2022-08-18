@@ -25,6 +25,10 @@ Easy gathering and fishing.
 
 Configurable movement speed multiplier.
 
+## Item Mods Color
+
+Colorful item names.
+
 ## Replay Quests
 
 Allows for completed quests to be replayed.
