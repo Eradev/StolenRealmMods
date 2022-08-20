@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDumper", "DataDumper\Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemModsColor", "ItemModsColor\ItemModsColor.csproj", "{57711FEA-A587-4B87-9810-F559A8EE0318}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRespec", "FreeRespec\FreeRespec.csproj", "{06DB314C-2714-4336-995A-55CDC5D36C01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{57711FEA-A587-4B87-9810-F559A8EE0318}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57711FEA-A587-4B87-9810-F559A8EE0318}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57711FEA-A587-4B87-9810-F559A8EE0318}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06DB314C-2714-4336-995A-55CDC5D36C01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06DB314C-2714-4336-995A-55CDC5D36C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06DB314C-2714-4336-995A-55CDC5D36C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06DB314C-2714-4336-995A-55CDC5D36C01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

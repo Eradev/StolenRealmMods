@@ -19,11 +19,15 @@ Handles chat commands from other mods.
 
 ## Easy Gathering
 
-Easy gathering and fishing.
+Easy gathering, fishing, and mining.
 
 ## Faster Movement Speed
 
 Configurable movement speed multiplier.
+
+## Free Respec
+
+Free respec.
 
 ## Item Mods Color
 
