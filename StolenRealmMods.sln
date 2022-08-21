@@ -23,6 +23,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemModsColor", "ItemModsCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRespec", "FreeRespec\FreeRespec.csproj", "{06DB314C-2714-4336-995A-55CDC5D36C01}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FuckElusiveMod", "FuckElusiveMod\FuckElusiveMod.csproj", "{3F354BE8-B139-4499-8381-BC11A37A34AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoveDropsLimit", "RemoveDropsLimit\RemoveDropsLimit.csproj", "{468DD439-601A-4F1D-838A-CA10A8507ECB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{06DB314C-2714-4336-995A-55CDC5D36C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06DB314C-2714-4336-995A-55CDC5D36C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06DB314C-2714-4336-995A-55CDC5D36C01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F354BE8-B139-4499-8381-BC11A37A34AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F354BE8-B139-4499-8381-BC11A37A34AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F354BE8-B139-4499-8381-BC11A37A34AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F354BE8-B139-4499-8381-BC11A37A34AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

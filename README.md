@@ -29,6 +29,10 @@ Configurable movement speed multiplier.
 
 Free respec.
 
+## FuckElusiveMod
+
+Removes the Elusive mod.
+
 ## Item Mods Color
 
 Colorful item names.
@@ -36,6 +40,10 @@ Colorful item names.
 ## Replay Quests
 
 Allows for completed quests to be replayed.
+
+## Remove Drops Limit
+
+Removes the drops limit.
 
 ## Skill Points
 
