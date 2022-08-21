@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -54,7 +56,14 @@ namespace eradev.stolenrealm.RemoveDropsLimit
             [UsedImplicitly]
             private static void Postfix(List<Item> __result)
             {
-                _log.LogDebug($"Looted {__result.Count} item{(__result.Count > 0 ? "s" : "")}!");
+                var itemCount = __result.Sum(x => x.numStacks);
+
+                _log.LogDebug($"Looted {itemCount} item{(itemCount > 0 ? "s" : "")}:");
+
+                foreach (var item in __result)
+                {
+                    _log.LogDebug($"  {Regex.Replace(item.ItemName, "<.*?>", string.Empty)}{(item.numStacks > 1 ? $" ({item.numStacks})" : "")}");
+                }
             }
         }
     }
