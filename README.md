@@ -29,10 +29,6 @@ Configurable movement speed multiplier.
 
 Free respec.
 
-## FuckElusiveMod
-
-Removes the Elusive mod.
-
 ## Item Mods Color
 
 Colorful item names.
