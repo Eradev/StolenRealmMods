@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FuckElusiveMod", "FuckElusi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoveDropsLimit", "RemoveDropsLimit\RemoveDropsLimit.csproj", "{468DD439-601A-4F1D-838A-CA10A8507ECB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterShopSelection", "BetterShopSelection\BetterShopSelection.csproj", "{3C542A9D-FC85-43C9-AD53-87A9422A609D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{468DD439-601A-4F1D-838A-CA10A8507ECB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C542A9D-FC85-43C9-AD53-87A9422A609D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C542A9D-FC85-43C9-AD53-87A9422A609D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C542A9D-FC85-43C9-AD53-87A9422A609D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C542A9D-FC85-43C9-AD53-87A9422A609D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
