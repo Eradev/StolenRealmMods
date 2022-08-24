@@ -19,7 +19,7 @@ namespace eradev.stolenrealm.BetterShopSelection
         }
 
         [HarmonyPatch(typeof(ShopManager), "RefreshItemDictSingle")]
-        public class GameLogicGenerateLootPatch
+        public class ShopManagerRefreshItemDictSinglePatch
         {
             [UsedImplicitly]
             private static bool Prefix(

@@ -8,10 +8,18 @@ Released mods are available to download at [ModWorkshop](https://modworkshop.net
 
 Changes to make the message window better:
 
-* Camera no longer moves when typing in the message window.
-* Enter key will now show the message window, and focus on the input field.
-* Message window no longer fades out when the input field is in focus.
+* Camera no longer moves when typing in the message window;
+* Enter key will now show the message window, and focus on the input field;
+* Message window no longer fades out when the input field is in focus;
 * Automatically focus on the input field after sending a message.
+
+## Better Tooltips
+
+Better tooltips:
+
+* Displays remaining duration on ground effects;
+* Displays stacks and remaining duration on buffs/debuffs;
+* Displays info when the buff/debuff cannot be dispelled.
 
 ## Command Handler
 
