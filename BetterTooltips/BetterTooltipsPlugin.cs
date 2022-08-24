@@ -14,6 +14,7 @@ namespace eradev.stolenrealm.BetterTooltips
     public class BetterTooltipsPlugin : BaseUnityPlugin
     {
         private static ManualLogSource _log;
+        private static readonly Dictionary<ActionStatusInfo, bool> IsGroundEffectCache = new ();
 
         [UsedImplicitly]
         private void Awake()
@@ -36,7 +37,20 @@ namespace eradev.stolenrealm.BetterTooltips
             {
                 var actionStatusInfoClone = actionStatusInfo.Clone();
 
-                if (actionStatusInfo.CannotBeDispelled || actionStatusInfo.IsAura)
+                var isGroundEffect = false;
+                if (IsGroundEffectCache.ContainsKey(actionStatusInfo))
+                {
+                    isGroundEffect = IsGroundEffectCache[actionStatusInfo];
+                }
+                else
+                {
+                    var info = actionStatusInfo;
+                    isGroundEffect = Game.Instance.GroundEffects.Any(x => x.ActionStatuses.Contains(info));
+
+                    IsGroundEffectCache.Add(actionStatusInfo, isGroundEffect);
+                }
+
+                if (actionStatusInfo.CannotBeDispelled || isGroundEffect)
                 {
                     actionStatusInfoClone.Description += "<br><br><color=yellow>Cannot be dispelled.</color>";
                 }
@@ -99,7 +113,7 @@ namespace eradev.stolenrealm.BetterTooltips
 
                     if (effectNetworkInfo.GroundEffectInfoIndex > -1)
                     {
-                        _log.LogDebug("Is effectNetworkInfo.GroundEffectInfoIndex");
+                        // _log.LogDebug("Is effectNetworkInfo.GroundEffectInfoIndex");
 
                         var groundEffectInfo = effectNetworkInfo.GroundEffectInfo;
                         var title = string.IsNullOrWhiteSpace(effectNetworkInfo.Title)
@@ -117,7 +131,7 @@ namespace eradev.stolenrealm.BetterTooltips
                             ? Game.Instance.GroundEffects[effectNetworkInfo.GroundEffectInfoIndex].TurnsToExpire - GameLogic.instance.turnNumber
                             : 0;
 
-                        _log.LogDebug($"turnsToExpire: {turnsToExpire}");
+                        // _log.LogDebug($"turnsToExpire: {turnsToExpire}");
 
                         key =  $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{descriptionExpression}";
                     }
