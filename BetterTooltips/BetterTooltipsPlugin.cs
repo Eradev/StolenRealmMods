@@ -99,7 +99,7 @@ namespace eradev.stolenrealm.BetterTooltips
             {
                 if (OptionsManager.instance.GroundEffectTooltipsDisabled)
                 {
-                    return false;
+                    return true;
                 }
 
                 __instance.ShowingGroundEffect = true;
@@ -170,7 +170,7 @@ namespace eradev.stolenrealm.BetterTooltips
                             currentMaxDuration = turnsToExpire;
                         }
 
-                        dictionary[key][0] = dictionary[key][0]++;
+                        dictionary[key][0] += 1;
                         dictionary[key][1] = currentMaxDuration;
                     }
                     else
