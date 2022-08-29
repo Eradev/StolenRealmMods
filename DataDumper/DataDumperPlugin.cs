@@ -12,10 +12,12 @@ namespace DataDumper
     public class Plugin : BaseUnityPlugin
     {
         private static ConfigEntry<string> _difficulties;
+        private static ConfigEntry<string> _gamblingChance;
 
         private void Awake()
         {
             _difficulties = Config.Bind("General", "Difficulties", string.Empty);
+            _gamblingChance = Config.Bind("General", "Gambling chance", string.Empty);
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -34,6 +36,10 @@ namespace DataDumper
                         difficulty => new DifficultyModifiers(difficulty));
 
                 _difficulties.Value = JsonConvert.SerializeObject(difficulties);
+
+                var gamblingChance = GamblingManager.Instance.RarityChances;
+
+                _gamblingChance.Value = JsonConvert.SerializeObject(gamblingChance);
             }
         }
     }

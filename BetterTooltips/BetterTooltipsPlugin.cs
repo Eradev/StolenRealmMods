@@ -37,7 +37,7 @@ namespace eradev.stolenrealm.BetterTooltips
             {
                 var actionStatusInfoClone = actionStatusInfo.Clone();
 
-                var isGroundEffect = false;
+                bool isGroundEffect;
                 if (IsGroundEffectCache.ContainsKey(actionStatusInfo))
                 {
                     isGroundEffect = IsGroundEffectCache[actionStatusInfo];
