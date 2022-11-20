@@ -13,11 +13,13 @@ namespace DataDumper
     {
         private static ConfigEntry<string> _difficulties;
         private static ConfigEntry<string> _gamblingChance;
+        private static ConfigEntry<string> _gamblingRolls;
 
         private void Awake()
         {
             _difficulties = Config.Bind("General", "Difficulties", string.Empty);
             _gamblingChance = Config.Bind("General", "Gambling chance", string.Empty);
+            _gamblingRolls = Config.Bind("General", "Gambling rolls", string.Empty);
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -40,6 +42,10 @@ namespace DataDumper
                 var gamblingChance = GamblingManager.Instance.RarityChances;
 
                 _gamblingChance.Value = JsonConvert.SerializeObject(gamblingChance);
+
+                var gamblingRolls = GamblingManager.Instance.GamblingRolls;
+
+                _gamblingRolls.Value = JsonConvert.SerializeObject(gamblingRolls);
             }
         }
     }

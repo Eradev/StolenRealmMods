@@ -30,6 +30,9 @@
     <Reference Include="Sirenix.Serialization">
       <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\Sirenix.Serialization.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

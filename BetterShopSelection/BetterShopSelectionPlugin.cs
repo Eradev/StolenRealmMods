@@ -160,5 +160,54 @@ namespace eradev.stolenrealm.BetterShopSelection
                 return false;
             }
         }
+
+        /*[HarmonyPatch(typeof(Inventory), "SetItemSlotOverrides")]
+        public class InventorySetItemSlotOverridesPatch
+        {
+            public static string GetCategoryFromItemInfo(ItemInfo itemInfo)
+            {
+                if (itemInfo.IsWeaponInfo)
+                {
+                    switch (((WeaponInfo)itemInfo).EquipmentType)
+                    {
+                        case EquipmentType.Bow:
+                        case EquipmentType.Gun_1H:
+                        case EquipmentType.Gun_2H:
+                        case EquipmentType.Staff:
+                        case EquipmentType.Wand:
+                            return "ranged weapon";
+
+                        default:
+                            return "melee weapon";
+                    }
+                }
+
+                switch (itemInfo.ItemType)
+                {
+                    case ItemType.Armor:
+                    case ItemType.Head:
+                    case ItemType.Shield:
+                        return "armor";
+
+                    case ItemType.Ring:
+                    case ItemType.Amulet:
+                        return "accessory";
+                }
+
+                return "undefined";
+            }
+
+            public static bool Prefix(float cost, Color color, List<ItemSlot> ___currentItemSlots)
+            {
+                foreach (var currentItemSlot in ___currentItemSlots)
+                {
+                    currentItemSlot.SetOverrides(cost, $"Mystery {GetCategoryFromItemInfo(currentItemSlot.ItemInfo)}", color);
+                    currentItemSlot.Icon.sprite = null;
+                    currentItemSlot.Icon.color = new Color(0f, 0f, 0f, 0f);
+                }
+
+                return false;
+            }
+        }*/
     }
 }
