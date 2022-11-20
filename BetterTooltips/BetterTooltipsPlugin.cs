@@ -26,7 +26,15 @@ namespace eradev.stolenrealm.BetterTooltips
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
-        [HarmonyPatch(typeof(Tooltip), "ShowActionStatusTooltip", typeof(ActionStatusInfo), typeof(Character), typeof(Character), typeof(Vector3), typeof(Item))]
+        [HarmonyPatch(typeof(Tooltip), "ShowActionStatusTooltip",
+            typeof(ActionStatusInfo),
+            typeof(Character),
+            typeof(Character),
+            typeof(Item),
+            typeof(PersistentDurationType),
+            typeof(string),
+            typeof(float),
+            typeof(bool))]
         public class TooltipShowActionStatusTooltipPatch
         {
             [UsedImplicitly]
