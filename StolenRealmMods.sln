@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterShopSelection", "Bett
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterTooltips", "BetterTooltips\BetterTooltips.csproj", "{6594B134-CCA1-4D8B-8656-B4E6544ECA2C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatPoints", "StatPoints\StatPoints.csproj", "{D57D6CD5-A6A0-42EF-9CC3-6B08B5B33671}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{6594B134-CCA1-4D8B-8656-B4E6544ECA2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6594B134-CCA1-4D8B-8656-B4E6544ECA2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6594B134-CCA1-4D8B-8656-B4E6544ECA2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D57D6CD5-A6A0-42EF-9CC3-6B08B5B33671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D57D6CD5-A6A0-42EF-9CC3-6B08B5B33671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D57D6CD5-A6A0-42EF-9CC3-6B08B5B33671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D57D6CD5-A6A0-42EF-9CC3-6B08B5B33671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
