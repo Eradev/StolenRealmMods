@@ -59,7 +59,7 @@ namespace eradev.stolenrealm.ItemModsColor
                 {
                     var color = ColorUtility.ToHtmlStringRGB(GlobalSettingsManager.instance.endGameSettings.ColorsByTier[(int)endGameMod.EndGameItemModTierType]);
 
-                    endgame = $"<color=#${color}>*</color>";
+                    endgame = $"<color=#{color}>*</color>";
                 }
 
                 __result = $"{prefix}{__instance.ItemInfo.ItemName}{suffix}{endgame}";
