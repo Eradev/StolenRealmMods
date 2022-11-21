@@ -8,7 +8,7 @@
 * Displays remaining duration on ground effects;
 * Displays stacks and remaining duration on buffs/debuffs;
 * Displays info when the buff/debuff cannot be dispelled.</Description>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterTooltips</RootNamespace>

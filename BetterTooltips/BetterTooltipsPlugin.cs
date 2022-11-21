@@ -114,19 +114,17 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 var dictionary = new Dictionary<string, int[]>();
 
-                foreach (var effectNetworkInfo in groundEffectNetworkInfos)
+                foreach (var groundEffectNetworkInfo in groundEffectNetworkInfos)
                 {
                     var key = "";
                     var turnsToExpire = 0;
 
-                    if (effectNetworkInfo.GroundEffectInfoIndex > -1)
+                    if (groundEffectNetworkInfo.GroundEffectInfoIndex > -1)
                     {
-                        // _log.LogDebug("Is effectNetworkInfo.GroundEffectInfoIndex");
-
-                        var groundEffectInfo = effectNetworkInfo.GroundEffectInfo;
-                        var title = string.IsNullOrWhiteSpace(effectNetworkInfo.Title)
+                        var groundEffectInfo = groundEffectNetworkInfo.GroundEffectInfo;
+                        var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
                             ? groundEffectInfo.Name
-                            : effectNetworkInfo.Title;
+                            : groundEffectNetworkInfo.Title;
                         var descriptionExpression = groundEffectInfo.ActionStatuses == null || groundEffectInfo.ActionStatuses.Length == 0
                             ? GUIManager.instance.tooltip.ApplyDescriptionExpressions(groundEffectInfo.Description,
                                 groundEffectInfo.DescriptionExpressions, NetworkingManager.Instance.NetworkManager.Root.WorldCharacter,
@@ -135,34 +133,35 @@ namespace eradev.stolenrealm.BetterTooltips
                                 groundEffectInfo.ActionStatuses[0].DescriptionExpressions,
                                 NetworkingManager.Instance.NetworkManager.Root.WorldCharacter, null, __instance.Description.fontSize);
 
-                        turnsToExpire = effectNetworkInfo.GroundEffectInfo.CanExpire
-                            ? Game.Instance.GroundEffects[effectNetworkInfo.GroundEffectInfoIndex].TurnsToExpire - GameLogic.instance.turnNumber
+                        turnsToExpire = groundEffectNetworkInfo.GroundEffectInfo.CanExpire
+                            ? Game.Instance.GroundEffects[groundEffectNetworkInfo.GroundEffectInfoIndex].TurnsToExpire - GameLogic.instance.turnNumber
                             : 0;
-
-                        // _log.LogDebug($"turnsToExpire: {turnsToExpire}");
 
                         key =  $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{descriptionExpression}";
                     }
 
-                    if (effectNetworkInfo.ActionInfoIndex > -1)
+                    if (groundEffectNetworkInfo.ActionInfoIndex > -1)
                     {
-                        var actionInfo = effectNetworkInfo.ActionInfo;
-                        var title = string.IsNullOrWhiteSpace(effectNetworkInfo.Title)
+                        var actionInfo = groundEffectNetworkInfo.ActionInfo;
+                        var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
                             ? actionInfo.ActionName
-                            : effectNetworkInfo.Title;
+                            : groundEffectNetworkInfo.Title;
 
-                        turnsToExpire = actionInfo.GroundIsInfinite
+                        // Only the host has access to this list.
+                        var foundGroundEffect = GameLogic.instance.GroundEffects.FirstOrDefault(x => x.EffectID == groundEffectNetworkInfo.ID);
+
+                        turnsToExpire = actionInfo.GroundIsInfinite || foundGroundEffect == null
                             ? 0
-                            : (int)Math.Ceiling((decimal)(GameLogic.instance.GroundEffects.First(x => x.EffectID == effectNetworkInfo.ID).ExpireTurnNumber - GameLogic.instance.turnNumber) / GameLogic.instance.NumberOfTeams);
+                            : (int)Math.Ceiling((decimal)(foundGroundEffect.ExpireTurnNumber - GameLogic.instance.turnNumber) / GameLogic.instance.NumberOfTeams);
 
-                            key += $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{effectNetworkInfo.Description}";
+                        key += $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{groundEffectNetworkInfo.Description}";
                     }
 
-                    if (effectNetworkInfo.Character != null)
+                    if (groundEffectNetworkInfo.Character != null)
                     {
-                        key += (effectNetworkInfo.OverrideTeamIndex
-                                ? effectNetworkInfo.OverrideTeamIndexValue
-                                : effectNetworkInfo.Character.TeamIndex) switch
+                        key += (groundEffectNetworkInfo.OverrideTeamIndex
+                                ? groundEffectNetworkInfo.OverrideTeamIndexValue
+                                : groundEffectNetworkInfo.Character.TeamIndex) switch
                                 {
                                     0 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.positiveColor)}><size=12>Friendly</size></color>",
                                     1 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.negativeColor)}><size=12>Enemy</size></color>",
@@ -205,8 +204,6 @@ namespace eradev.stolenrealm.BetterTooltips
                         description += $"\n\nDuration: {duration} turn{(duration > 1 ? "s" : "")}";
                     }
                 }
-
-                // _log.LogDebug($"{description}");
 
                 __instance.ShowTooltip("", "", null, description, null, __instance.defaultTitleColor, false, alpha: 0.9f);
 
