@@ -23,6 +23,8 @@ namespace eradev.stolenrealm.ToggleDebugMode
         private static readonly List<string> DebugKeys = new()
         {
             "DebugModeEnabled",
+            "DebugMode:ToggleUnlockAllQuests",
+            "DebugMode:ToggleUnlockMapNodes",
             "DebugMode:ToggleUnlockAllSkills",
             "DebugMode:ToggleFastMovement",
             "DebugMode:ToggleFreeCasting",
@@ -33,13 +35,17 @@ namespace eradev.stolenrealm.ToggleDebugMode
             "DebugMode:ToggleInfMoveObjectRange",
             "DebugMode:ToggleNeverExpendEvents",
             "DebugMode:ToggleHideTextEvents",
-            "DebugMode:ToggleNewStoryQuests",
             "DebugMode:ToggleForceEvent",
+            "DebugMode:InputEventRollResults",
+            "DebugMode:EventRollValue",
             "DebugMode:ToggleForceProfession",
             "DebugMode:ToggleForceDestructible",
             "DebugMode:ToggleForceEnemyMod",
-            "DebugMode:ToggleUnlockAllQuests",
-            "DebugMode:ToggleUnlockMapNodes"
+            "DebugMode:ProfessionToForce",
+            "DebugMode:EnemyModToForce",
+            "DebugMode:EventToForce",
+            "DebugMode:DestructibleToForce",
+            "DebugMode:StatusToGive"
         };
 
         [UsedImplicitly]
@@ -108,6 +114,8 @@ namespace eradev.stolenrealm.ToggleDebugMode
                 PlayerPrefs.DeleteKey(key);
             }
 
+            DebugWindow.instance.UnlockAllQuestsToggle.isOn = false;
+            DebugWindow.instance.UnlockMapNodesToggle.isOn = false;
             DebugWindow.instance.UnlockAllSkillsToggle.isOn = false;
             DebugWindow.instance.FastMovementToggle.isOn = false;
             DebugWindow.instance.FreeCastingToggle.isOn = false;
@@ -116,15 +124,17 @@ namespace eradev.stolenrealm.ToggleDebugMode
             DebugWindow.instance.FreeCraftingToggle.isOn = false;
             DebugWindow.instance.Damage_X10Toggle.isOn = false;
             DebugWindow.instance.InfMoveObjectRangeToggle.isOn = false;
-            DebugWindow.instance.NeverExpendEventsToggle.isOn = false;
-            DebugWindow.instance.HideTextEventsToggle.isOn = false;
-            DebugWindow.instance.NewStoryQuestsToggle.isOn = false;
+            DebugWindow.instance.InputEventRollResultToggle.isOn = false;
             DebugWindow.instance.ForceEventToggle.isOn = false;
             DebugWindow.instance.ForceProfessionToggle.isOn = false;
             DebugWindow.instance.ForceDestructibleToggle.isOn = false;
             DebugWindow.instance.ForceEnemyModToggle.isOn = false;
-            DebugWindow.instance.UnlockAllQuestsToggle.isOn = false;
-            DebugWindow.instance.UnlockMapNodesToggle.isOn = false;
+            DebugWindow.instance.NeverExpendEventsToggle.isOn = false;
+            DebugWindow.instance.HideTextEventsToggle.isOn = false;
+            DebugWindow.instance.HideHealthbarsToggle.isOn = false;
+            DebugWindow.instance.HideHexBordersToggle.isOn = false;
+            DebugWindow.instance.HideCharacterHoverInfoToggle.isOn = false;
+            DebugWindow.instance.HideBasicUIToggle.isOn = false;
 
             CommandHandler.DisplayMessage("Successfully disabled the debug mode.");
         }
