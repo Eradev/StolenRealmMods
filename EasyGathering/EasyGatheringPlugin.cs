@@ -50,9 +50,9 @@ namespace eradev.stolenrealm.EasyGathering
             [UsedImplicitly]
             private static bool Prefix(
                 ref ProfessionManager __instance,
-                // ReSharper disable once RedundantAssignment
                 ref bool ___currentlyGathering,
-                ref PlayerMovement ___professionPlayer)
+                PlayerMovement ___professionPlayer,
+                HexCell ___currentProfessionHex)
             {
                 if (_isDisabled.Value)
                 {
@@ -61,7 +61,7 @@ namespace eradev.stolenrealm.EasyGathering
 
                 ___currentlyGathering = false;
 
-                var herb = PortalManager.Instance.CurrentIsland.gatheringDict[PortalManager.Instance.currentEventHex];
+                var herb = PortalManager.Instance.CurrentIsland.gatheringDict[___currentProfessionHex];
                 var items = herb.GetItems();
 
                 if (__instance.gatheringLoopSound)
@@ -72,12 +72,12 @@ namespace eradev.stolenrealm.EasyGathering
                 var routine = AccessTools.Method(typeof(ProfessionManager), "ShowProfessionSuccess").Invoke(__instance,
                     new object[]
                     {
-                        "Perfect!",
+                        OptionsManager.Localize("Perfect!"),
                         items,
                         3,
                         ShakeIntensity.Light,
                         ProfessionType.Gathering,
-                        PortalManager.Instance.currentEventHex,
+                        ___currentProfessionHex,
                         null,
                         herb.NumCharges,
                         __instance.gatheringAnimDelay,
@@ -98,9 +98,7 @@ namespace eradev.stolenrealm.EasyGathering
             [UsedImplicitly]
             private static void Postfix(
                 ref ProfessionManager __instance,
-                // ReSharper disable once RedundantAssignment
                 ref bool ___success,
-                // ReSharper disable once RedundantAssignment
                 ref bool ___perfectCatch)
             {
                 if (_isDisabled.Value)
@@ -120,9 +118,9 @@ namespace eradev.stolenrealm.EasyGathering
             [UsedImplicitly]
             private static bool Prefix(
                 ref ProfessionManager __instance,
-                // ReSharper disable once RedundantAssignment
                 ref bool ___currentlyMining,
-                ref PlayerMovement ___professionPlayer)
+                PlayerMovement ___professionPlayer,
+                HexCell ___currentProfessionHex)
             {
                 if (_isDisabled.Value)
                 {
@@ -131,20 +129,18 @@ namespace eradev.stolenrealm.EasyGathering
 
                 ___currentlyMining = false;
 
-                var portalManager = PortalManager.Instance;
-
-                var oreVein = portalManager.CurrentIsland.miningDict[portalManager.currentEventHex];
+                var oreVein = PortalManager.Instance.CurrentIsland.miningDict[___currentProfessionHex];
                 var items = oreVein.GetItems();
 
                 var routine = AccessTools.Method(typeof(ProfessionManager), "ShowProfessionSuccess").Invoke(__instance,
                     new object[]
                     {
-                        "Perfect!",
+                        OptionsManager.Localize("Perfect!"),
                         items,
                         oreVein.OkayAmount * 4,
                         ShakeIntensity.Medium,
                         ProfessionType.Mining,
-                        PortalManager.Instance.currentEventHex,
+                        ___currentProfessionHex,
                         oreVein.successEffect,
                         oreVein.NumCharges,
                         0.85f,

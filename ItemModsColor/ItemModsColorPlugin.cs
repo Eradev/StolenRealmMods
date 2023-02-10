@@ -28,7 +28,7 @@ namespace eradev.stolenrealm.ItemModsColor
             {
                 if (__instance.ItemMods == null || __instance.ItemMods.Count == 0)
                 {
-                    __result = __instance.ItemInfo.ItemName;
+                    __result = OptionsManager.Localize(__instance.ItemInfo.ItemName);
 
                     return false;
                 }
@@ -41,18 +41,20 @@ namespace eradev.stolenrealm.ItemModsColor
                 var suffix = "";
                 var endgame = "";
 
+                var languageGender = OptionsManager.GetLanguageGender(__instance.ItemInfo.ItemName);
+
                 if (prefixMod)
                 {
                     var color = ColorUtility.ToHtmlStringRGB(GlobalSettingsManager.instance.globalSettings.GetItemQualityColor(prefixMod.Rarity));
 
-                    prefix = $"<color=#{color}>{prefixMod.name}</color> ";
+                    prefix = $"<color=#{color}>{OptionsManager.Localize(prefixMod.name, languageGender)}</color> ";
                 }
 
                 if (suffixMod)
                 {
                     var color = ColorUtility.ToHtmlStringRGB(GlobalSettingsManager.instance.globalSettings.GetItemQualityColor(suffixMod.Rarity));
 
-                    suffix = $" <color=#{color}>{suffixMod.SuffixPretext.Trim()} {suffixMod.name}</color>";
+                    suffix = $" <color=#{color}>{OptionsManager.Localize($"{suffixMod.SuffixPretext.Trim()} {suffixMod.name}", languageGender)}</color>";
                 }
 
                 if (endGameMod)
@@ -62,7 +64,7 @@ namespace eradev.stolenrealm.ItemModsColor
                     endgame = $"<color=#{color}>*</color>";
                 }
 
-                __result = $"{prefix}{__instance.ItemInfo.ItemName}{suffix}{endgame}";
+                __result = $"{prefix}{OptionsManager.Localize(__instance.ItemInfo.ItemName)}{suffix}{endgame}";
 
                 return false;
             }
