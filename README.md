@@ -41,10 +41,6 @@ Free respec.
 
 Colorful item names.
 
-## Replay Quests
-
-Allows for completed quests to be replayed.
-
 ## Remove Drops Limit
 
 Removes the drops limit.
