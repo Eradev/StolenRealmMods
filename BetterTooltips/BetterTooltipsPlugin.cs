@@ -13,7 +13,9 @@ namespace eradev.stolenrealm.BetterTooltips
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class BetterTooltipsPlugin : BaseUnityPlugin
     {
+        // ReSharper disable once NotAccessedField.Local
         private static ManualLogSource _log;
+
         private static readonly Dictionary<ActionStatusInfo, bool> IsGroundEffectCache = new ();
 
         [UsedImplicitly]
@@ -34,12 +36,14 @@ namespace eradev.stolenrealm.BetterTooltips
             typeof(PersistentDurationType),
             typeof(string),
             typeof(float),
-            typeof(bool))]
+            typeof(bool),
+            typeof(string))]
         public class TooltipShowActionStatusTooltipPatch
         {
             [UsedImplicitly]
             private static void Prefix(
                 ref ActionStatusInfo actionStatusInfo,
+                PersistentDurationType persistentDurationType,
                 Character source,
                 Character target)
             {
@@ -53,12 +57,24 @@ namespace eradev.stolenrealm.BetterTooltips
                 else
                 {
                     var info = actionStatusInfo;
-                    isGroundEffect = Game.Instance.GroundEffects.Any(x => x.ActionStatuses.Contains(info));
+
+                    isGroundEffect = Game.Instance.GroundEffects.Any(x => x.ActionStatuses.Contains(info)) ||
+                                     GameLogic.instance.GroundEffects.Any(x => x.ActionStatuses.Contains(info));
 
                     IsGroundEffectCache.Add(actionStatusInfo, isGroundEffect);
                 }
 
-                if (actionStatusInfo.CannotBeDispelled || isGroundEffect)
+                /*_log.LogDebug($"Name: {OptionsManager.Localize(actionStatusInfo.Name)}");
+                _log.LogDebug($"Description: {OptionsManager.Localize(actionStatusInfo.Description)}");
+                _log.LogDebug($"Cannot be dispelled: {actionStatusInfo.CannotBeDispelled}");
+                _log.LogDebug($"Persistent duration type: {persistentDurationType}");
+                _log.LogDebug($"IsGroundEffect: {isGroundEffect}");
+                _log.LogDebug($"IsAura: {actionStatusInfo.IsAura}");*/
+
+                if (actionStatusInfo.CannotBeDispelled ||
+                    isGroundEffect ||
+                    actionStatusInfo.IsAura ||
+                    persistentDurationType is PersistentDurationType.Quest)
                 {
                     actionStatusInfoClone.Description += "<br><br><color=yellow>Cannot be dispelled.</color>";
                 }
@@ -72,23 +88,26 @@ namespace eradev.stolenrealm.BetterTooltips
                     {
                         extraLineBreakAdded = true;
 
-                        actionStatusInfoClone.Description += $"<br><br>Stacks: {stackCount}";
+                        actionStatusInfoClone.Description += $"<br><br>{OptionsManager.Localize("Stack")}: {stackCount}";
                     }
                 }
 
-                if (!actionStatusInfo.Infinite && source != null)
+                if (!actionStatusInfoClone.Infinite && source != null)
                 {
-                    var duration = (int)Game.Eval<float>(actionStatusInfo.Duration, new GameFunctionParameters
+                    var duration = Game.Eval<float>(actionStatusInfo.Duration, new GameFunctionParameters
                     {
                         Source = source
                     });
 
-                    if (!extraLineBreakAdded)
+                    if (duration > 0f)
                     {
-                        actionStatusInfoClone.Description += "<br>";
-                    }
+                        if (!extraLineBreakAdded)
+                        {
+                            actionStatusInfoClone.Description += "<br>";
+                        }
 
-                    actionStatusInfoClone.Description += $"<br>Duration: {duration} turn{(duration > 1 ? "s" : "")}";
+                        actionStatusInfoClone.Description += $"<br>{Tooltip.GetLocalizedDurationText(false, duration)}";
+                    }
                 }
 
                 actionStatusInfo = actionStatusInfoClone;
@@ -123,13 +142,13 @@ namespace eradev.stolenrealm.BetterTooltips
                     {
                         var groundEffectInfo = groundEffectNetworkInfo.GroundEffectInfo;
                         var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
-                            ? groundEffectInfo.Name
-                            : groundEffectNetworkInfo.Title;
+                            ? OptionsManager.Localize(groundEffectInfo.Name)
+                            : OptionsManager.Localize(groundEffectNetworkInfo.Title);
                         var descriptionExpression = groundEffectInfo.ActionStatuses == null || groundEffectInfo.ActionStatuses.Length == 0
-                            ? GUIManager.instance.tooltip.ApplyDescriptionExpressions(groundEffectInfo.Description,
+                            ? GUIManager.instance.tooltip.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.Description),
                                 groundEffectInfo.DescriptionExpressions, NetworkingManager.Instance.NetworkManager.Root.WorldCharacter,
                                 null, __instance.Description.fontSize)
-                            : GUIManager.instance.tooltip.ApplyDescriptionExpressions(groundEffectInfo.ActionStatuses[0].Description,
+                            : GUIManager.instance.tooltip.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.ActionStatuses[0].Description),
                                 groundEffectInfo.ActionStatuses[0].DescriptionExpressions,
                                 NetworkingManager.Instance.NetworkManager.Root.WorldCharacter, null, __instance.Description.fontSize);
 
@@ -144,8 +163,8 @@ namespace eradev.stolenrealm.BetterTooltips
                     {
                         var actionInfo = groundEffectNetworkInfo.ActionInfo;
                         var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
-                            ? actionInfo.ActionName
-                            : groundEffectNetworkInfo.Title;
+                            ? OptionsManager.Localize(actionInfo.ActionName)
+                            : OptionsManager.Localize(groundEffectNetworkInfo.Title);
 
                         // Only the host has access to this list.
                         var foundGroundEffect = GameLogic.instance.GroundEffects.FirstOrDefault(x => x.EffectID == groundEffectNetworkInfo.ID);
@@ -154,7 +173,7 @@ namespace eradev.stolenrealm.BetterTooltips
                             ? 0
                             : (int)Math.Ceiling((decimal)(foundGroundEffect.ExpireTurnNumber - GameLogic.instance.turnNumber) / GameLogic.instance.NumberOfTeams);
 
-                        key += $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{groundEffectNetworkInfo.Description}";
+                        key += $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{OptionsManager.Localize(groundEffectNetworkInfo.Description)}";
                     }
 
                     if (groundEffectNetworkInfo.Character != null)
@@ -163,9 +182,9 @@ namespace eradev.stolenrealm.BetterTooltips
                                 ? groundEffectNetworkInfo.OverrideTeamIndexValue
                                 : groundEffectNetworkInfo.Character.TeamIndex) switch
                                 {
-                                    0 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.positiveColor)}><size=12>Friendly</size></color>",
-                                    1 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.negativeColor)}><size=12>Enemy</size></color>",
-                                    _ => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.neutralColor)}><size=12>Neutral</size></color>"
+                                    0 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.positiveColor)}><size=12>{OptionsManager.Localize("Friendly")}</size></color>",
+                                    1 => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.negativeColor)}><size=12>{OptionsManager.Localize("Enemy")}</size></color>",
+                                    _ => $"\n<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.instance.neutralColor)}><size=12>{OptionsManager.Localize("Neutral")}</size></color>"
                                 };
                     }
 
@@ -201,7 +220,7 @@ namespace eradev.stolenrealm.BetterTooltips
 
                     if (duration > 0)
                     {
-                        description += $"\n\nDuration: {duration} turn{(duration > 1 ? "s" : "")}";
+                        description += $"\n\n{Tooltip.GetLocalizedDurationText(false, duration)}";
                     }
                 }
 
