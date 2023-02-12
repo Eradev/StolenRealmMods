@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using BepInEx;
 using BepInEx.Logging;
@@ -45,7 +46,9 @@ namespace eradev.stolenrealm.BetterTooltips
                 ref ActionStatusInfo actionStatusInfo,
                 PersistentDurationType persistentDurationType,
                 Character source,
-                Character target)
+                Character target,
+                string header,
+                float level)
             {
                 var actionStatusInfoClone = actionStatusInfo.Clone();
 
@@ -68,8 +71,10 @@ namespace eradev.stolenrealm.BetterTooltips
                 _log.LogDebug($"Description: {OptionsManager.Localize(actionStatusInfo.Description)}");
                 _log.LogDebug($"Cannot be dispelled: {actionStatusInfo.CannotBeDispelled}");
                 _log.LogDebug($"Persistent duration type: {persistentDurationType}");
+                _log.LogDebug($"Status type: {actionStatusInfo.StatusType}");
                 _log.LogDebug($"IsGroundEffect: {isGroundEffect}");
-                _log.LogDebug($"IsAura: {actionStatusInfo.IsAura}");*/
+                _log.LogDebug($"IsAura: {actionStatusInfo.IsAura}");
+                _log.LogDebug($"header: {header}");*/
 
                 if (actionStatusInfo.CannotBeDispelled ||
                     isGroundEffect ||
@@ -81,9 +86,34 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 var extraLineBreakAdded = false;
 
+                //_log.LogDebug($"Can stack: {actionStatusInfo.CanStack}");
                 if (actionStatusInfo.CanStack)
                 {
-                    var stackCount = actionStatusInfo.GetNumStacksFromSource(source, target);
+
+                    /*_log.LogDebug($"Source null?: {source == null}");
+                    _log.LogDebug($"Target null?: {target == null}");
+                    _log.LogDebug($"Stack count: {stackCount}");
+                    _log.LogDebug($"Stack ignoreSource: {actionStatusInfo.StackIgnoreSource}");*/
+
+                    int stackCount;
+
+                    if (actionStatusInfo.StackIgnoreSource)
+                    {
+                        var actionStatusGuid = actionStatusInfo.Guid;
+
+                        stackCount = target == null
+                            ? 0
+                            : target.ActionStatuses
+                                .Where(x => x.ActionStatusInfo.Guid == actionStatusGuid)
+                                .Select(x => x.TotalStacks)
+                                .Sum();
+                    }
+                    else
+                    {
+                        stackCount = actionStatusInfo.GetNumStacksFromSource(source, target);
+                    }
+
+
                     if (stackCount > 1)
                     {
                         extraLineBreakAdded = true;
@@ -107,6 +137,31 @@ namespace eradev.stolenrealm.BetterTooltips
                         }
 
                         actionStatusInfoClone.Description += $"<br>{Tooltip.GetLocalizedDurationText(false, duration)}";
+                    }
+                }
+
+                if (persistentDurationType == PersistentDurationType.Permanent)
+                {
+                    var fortuneGuid = actionStatusInfo.Guid.ToString();
+
+                    actionStatusInfoClone.Description += "<br>";
+
+                    foreach (var character in NetworkingManager.Instance.PartyCharacters)
+                    {
+                        var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == fortuneGuid);
+
+                        if (characterFortune == null)
+                        {
+                            actionStatusInfoClone.Description += $"<br><color=red>{character.CharacterName}</color>";
+                        }
+                        else
+                        {
+                            var colorString = characterFortune.Level < level ? "yellow" : "green";
+                            var levelString = OptionsManager.Localize("Level [level value]")
+                                .Replace("[level value]", characterFortune.Level.ToString(CultureInfo.InvariantCulture));
+
+                            actionStatusInfoClone.Description += $"<br><color={colorString}>{character.CharacterName} ({levelString})</color>";
+                        }
                     }
                 }
 
