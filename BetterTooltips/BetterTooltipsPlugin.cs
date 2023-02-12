@@ -140,14 +140,14 @@ namespace eradev.stolenrealm.BetterTooltips
                     }
                 }
 
-                /*
                 if (persistentDurationType == PersistentDurationType.Permanent)
                 {
                     var fortuneGuid = actionStatusInfo.Guid.ToString();
 
                     actionStatusInfoClone.Description += "<br>";
 
-                    foreach (var character in NetworkingManager.Instance.PartyCharacters)
+                    //_log.LogDebug("Trying to get my party characters...");
+                    foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
                     {
                         var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == fortuneGuid);
 
@@ -165,7 +165,6 @@ namespace eradev.stolenrealm.BetterTooltips
                         }
                     }
                 }
-                */
 
                 actionStatusInfo = actionStatusInfoClone;
             }
