@@ -140,6 +140,7 @@ namespace eradev.stolenrealm.BetterTooltips
                     }
                 }
 
+                /*
                 if (persistentDurationType == PersistentDurationType.Permanent)
                 {
                     var fortuneGuid = actionStatusInfo.Guid.ToString();
@@ -164,6 +165,7 @@ namespace eradev.stolenrealm.BetterTooltips
                         }
                     }
                 }
+                */
 
                 actionStatusInfo = actionStatusInfoClone;
             }
