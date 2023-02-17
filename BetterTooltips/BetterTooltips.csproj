@@ -7,8 +7,10 @@
 
 * Displays remaining duration on ground effects;
 * Displays stacks and remaining duration on buffs/debuffs;
-* Displays info when the buff/debuff cannot be dispelled.</Description>
-    <Version>1.1.0</Version>
+* Displays info when the buff/debuff cannot be dispelled;
+* Displays who has the same Fortune and their current level;
+* Displays the current selected action in battle. (And clearer in the skillbar as well)</Description>
+    <Version>1.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterTooltips</RootNamespace>
@@ -36,6 +38,9 @@
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>F:\SteamLibrary\steamapps\common\Stolen Realm\Stolen Realm_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   

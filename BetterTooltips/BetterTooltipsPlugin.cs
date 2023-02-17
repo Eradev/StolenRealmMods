@@ -5,9 +5,11 @@ using System.Linq;
 using BepInEx;
 using BepInEx.Logging;
 using Burst2Flame;
+using Burst2Flame.Observable;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace eradev.stolenrealm.BetterTooltips
 {
@@ -27,6 +29,121 @@ namespace eradev.stolenrealm.BetterTooltips
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+        }
+
+        [HarmonyPatch(typeof(HexCellManager), "CurrentState", MethodType.Setter)]
+        public class HexCellManagerCurrentStatePatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(HexCellManager __instance)
+            {
+                if (GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                    __instance.CurrentState != PlayerState.Movement)
+                {
+                    return;
+                }
+
+                var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
+
+                foreach (var actionSlot in actionSlots)
+                {
+                    actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ActionSlot), "SelectActionSlot")]
+        public class ActionSlotSelectActionSlotPatch
+        {
+            [UsedImplicitly]
+            private static void Prefix(ActionSlot __instance)
+            {
+                __instance.RefreshActionSlot(__instance.ActionAndSkill);
+            }
+
+            [UsedImplicitly]
+            private static void Postfix()
+            {
+                var hexCellManager = HexCellManager.instance;
+
+                if (hexCellManager == null ||
+                    GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                    hexCellManager.CurrentState != PlayerState.Action ||
+                    hexCellManager.MyPlayer.CurrentAction == null)
+                {
+                    return;
+                }
+
+                var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
+
+                foreach (var actionSlot in actionSlots)
+                {
+                    actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
+                }
+
+                if (actionSlots.All(x => x.ActionAndSkill.ActionInfo != hexCellManager.MyPlayer.CurrentAction))
+                {
+                    return;
+                }
+
+                var otherSlots = actionSlots.Where(x => x.ActionAndSkill.ActionInfo != hexCellManager.MyPlayer.CurrentAction).ToList();
+
+                foreach (var actionSlot in otherSlots)
+                {
+                    actionSlot.cooldownOverlay.enabled = true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(HexCellManager), "CurrentlyHoveringHexCell", MethodType.Setter)]
+        public class HexCellManagerCurrentlyHoveringHexCellPatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(HexCellManager __instance)
+            {
+                if (GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                    __instance.CurrentlyHoveringHexCell == null ||
+                    CursorManager.instance.HoveringUseableObject)
+                {
+                    return;
+                }
+
+                var selectedCharacter = GameLogic.instance.CurrentlySelectedCharacter;
+
+                if (__instance.CurrentlyHoveringHexCell.HasEnemy(selectedCharacter))
+                {
+                    GUIManager.instance.tooltip.HideTooltip();
+
+                    switch (__instance.CurrentState)
+                    {
+                        case PlayerState.Movement:
+                            if (AccessTools.FieldRefAccess<CursorType>(typeof(CursorManager), "currentCursorType")
+                                    .Invoke(CursorManager.instance) == CursorType.Attack)
+                            {
+                                ShowSelectedActionTooltip(selectedCharacter.BasicAttacks[0]);
+                            }
+
+                            break;
+
+                        case PlayerState.Action:
+                            if (IsCurrentHoveringCellValidCellForAction())
+                            {
+                                ShowSelectedActionTooltip(__instance.MyPlayer.CurrentAction);
+                            }
+
+                            break;
+                    }
+                }
+                else if (__instance.CurrentState == PlayerState.Action)
+                {
+                    GUIManager.instance.tooltip.HideTooltip();
+
+                    if (IsCurrentHoveringCellValidCellForAction())
+                    {
+                        ShowSelectedActionTooltip(__instance.MyPlayer.CurrentAction);
+                    }
+                }
+            }
         }
 
         [HarmonyPatch(typeof(Tooltip), "ShowActionStatusTooltip",
@@ -286,6 +403,42 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 return false;
             }
+        }
+
+        [HarmonyPatch(typeof(Tooltip), "ShowTooltip")]
+        public class TooltipShowTooltipPatch
+        {
+            [UsedImplicitly]
+            private static void Prefix(Tooltip __instance)
+            {
+                __instance.GetComponent<Image>().enabled = true;
+            }
+        }
+
+        private static bool IsCurrentHoveringCellValidCellForAction()
+        {
+            var selectedCharacter = GameLogic.instance.CurrentlySelectedCharacter;
+            var hexCellManager = HexCellManager.instance;
+
+            var playerMovement = hexCellManager.MyPlayer;
+
+            var canCast = playerMovement.CanCast(new StructList<HexCell> { hexCellManager.CurrentlyHoveringHexCell }, playerMovement.CurrentAction).CanCast;
+            var hasLoS = !hexCellManager.CurrentlyHoveringHexCell.GetLineOfSightHitPoint(selectedCharacter.Cell).HasValue;
+
+            return canCast && hasLoS;
+        }
+
+        private static void ShowSelectedActionTooltip(ActionInfo actionInfo)
+        {
+            var tooltip = GUIManager.instance.tooltip;
+            var skill = Game.Instance.GetSkillFromActionInfo(actionInfo);
+
+            //tooltip.ShowTooltip(OptionsManager.Localize(skill.SkillName), "", skill.Icon, "Execute selected action", null, tooltip.defaultTitleColor, alpha: 0.7f);
+            tooltip.ShowTooltip(OptionsManager.Localize(skill.SkillName), "", skill.Icon, "", null, Color.white, alpha: 0.7f);
+            tooltip.GetComponent<Image>().enabled = false;
+            tooltip.TitleSep.SetActive(false);
+
+            AccessTools.FieldRefAccess<bool>(typeof(Tooltip), "hideOnNotHoveringGO").Invoke(tooltip) = true;
         }
     }
 }

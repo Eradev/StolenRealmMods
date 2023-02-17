@@ -20,7 +20,8 @@ Better tooltips:
 * Displays remaining duration on ground effects;
 * Displays stacks and remaining duration on buffs/debuffs;
 * Displays info when the buff/debuff cannot be dispelled;
-* Displays who has the same Fortune and their current level.
+* Displays who has the same Fortune and their current level;
+* Displays the current selected action in battle. (And clearer in the skillbar as well)
 
 Note: Duration only appear for the host.
 
