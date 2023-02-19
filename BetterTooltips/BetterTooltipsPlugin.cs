@@ -43,12 +43,7 @@ namespace eradev.stolenrealm.BetterTooltips
                     return;
                 }
 
-                var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
-
-                foreach (var actionSlot in actionSlots)
-                {
-                    actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
-                }
+                RefreshActionSlotsInSkillBar();
             }
         }
 
@@ -58,6 +53,7 @@ namespace eradev.stolenrealm.BetterTooltips
             [UsedImplicitly]
             private static void Prefix(ActionSlot __instance)
             {
+                // Refresh the status of the ActionSlot so it can be selected if disabled previously by this mod
                 __instance.RefreshActionSlot(__instance.ActionAndSkill);
             }
 
@@ -74,12 +70,9 @@ namespace eradev.stolenrealm.BetterTooltips
                     return;
                 }
 
-                var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
+                RefreshActionSlotsInSkillBar();
 
-                foreach (var actionSlot in actionSlots)
-                {
-                    actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
-                }
+                var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
 
                 if (actionSlots.All(x => x.ActionAndSkill.ActionInfo != hexCellManager.MyPlayer.CurrentAction))
                 {
@@ -112,6 +105,7 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 if (__instance.CurrentlyHoveringHexCell.HasEnemy(selectedCharacter))
                 {
+                    // This is necessary or the tooltip will flicker. Cannot be put earlier or it will hide other tooltips.
                     GUIManager.instance.tooltip.HideTooltip();
 
                     switch (__instance.CurrentState)
@@ -136,6 +130,7 @@ namespace eradev.stolenrealm.BetterTooltips
                 }
                 else if (__instance.CurrentState == PlayerState.Action)
                 {
+                    // This is necessary or the tooltip will flicker. Cannot be put earlier or it will hide other tooltips.
                     GUIManager.instance.tooltip.HideTooltip();
 
                     if (IsCurrentHoveringCellValidCellForAction())
@@ -184,15 +179,6 @@ namespace eradev.stolenrealm.BetterTooltips
                     IsGroundEffectCache.Add(actionStatusInfo, isGroundEffect);
                 }
 
-                /*_log.LogDebug($"Name: {OptionsManager.Localize(actionStatusInfo.Name)}");
-                _log.LogDebug($"Description: {OptionsManager.Localize(actionStatusInfo.Description)}");
-                _log.LogDebug($"Cannot be dispelled: {actionStatusInfo.CannotBeDispelled}");
-                _log.LogDebug($"Persistent duration type: {persistentDurationType}");
-                _log.LogDebug($"Status type: {actionStatusInfo.StatusType}");
-                _log.LogDebug($"IsGroundEffect: {isGroundEffect}");
-                _log.LogDebug($"IsAura: {actionStatusInfo.IsAura}");
-                _log.LogDebug($"header: {header}");*/
-
                 if (actionStatusInfo.CannotBeDispelled ||
                     isGroundEffect ||
                     actionStatusInfo.IsAura ||
@@ -203,15 +189,8 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 var extraLineBreakAdded = false;
 
-                //_log.LogDebug($"Can stack: {actionStatusInfo.CanStack}");
                 if (actionStatusInfo.CanStack)
                 {
-
-                    /*_log.LogDebug($"Source null?: {source == null}");
-                    _log.LogDebug($"Target null?: {target == null}");
-                    _log.LogDebug($"Stack count: {stackCount}");
-                    _log.LogDebug($"Stack ignoreSource: {actionStatusInfo.StackIgnoreSource}");*/
-
                     int stackCount;
 
                     if (actionStatusInfo.StackIgnoreSource)
@@ -257,13 +236,13 @@ namespace eradev.stolenrealm.BetterTooltips
                     }
                 }
 
+                // Display for Fortunes
                 if (persistentDurationType == PersistentDurationType.Permanent)
                 {
                     var fortuneGuid = actionStatusInfo.Guid.ToString();
 
                     actionStatusInfoClone.Description += "<br>";
 
-                    //_log.LogDebug("Trying to get my party characters...");
                     foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
                     {
                         var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == fortuneGuid);
@@ -411,7 +390,18 @@ namespace eradev.stolenrealm.BetterTooltips
             [UsedImplicitly]
             private static void Prefix(Tooltip __instance)
             {
+                // Resets the Image component that's disabled in ShowSelectedActionTooltip
                 __instance.GetComponent<Image>().enabled = true;
+            }
+        }
+
+        private static void RefreshActionSlotsInSkillBar()
+        {
+            var actionSlots = Skillbar.Instance.transform.GetComponentsInChildren<ActionSlot>();
+
+            foreach (var actionSlot in actionSlots)
+            {
+                actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
             }
         }
 
@@ -433,7 +423,6 @@ namespace eradev.stolenrealm.BetterTooltips
             var tooltip = GUIManager.instance.tooltip;
             var skill = Game.Instance.GetSkillFromActionInfo(actionInfo);
 
-            //tooltip.ShowTooltip(OptionsManager.Localize(skill.SkillName), "", skill.Icon, "Execute selected action", null, tooltip.defaultTitleColor, alpha: 0.7f);
             tooltip.ShowTooltip(OptionsManager.Localize(skill.SkillName), "", skill.Icon, "", null, Color.white, alpha: 0.7f);
             tooltip.GetComponent<Image>().enabled = false;
             tooltip.TitleSep.SetActive(false);
