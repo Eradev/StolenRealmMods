@@ -293,14 +293,15 @@ namespace eradev.stolenrealm.BetterTooltips
                     if (groundEffectNetworkInfo.GroundEffectInfoIndex > -1)
                     {
                         var groundEffectInfo = groundEffectNetworkInfo.GroundEffectInfo;
-                        var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
-                            ? OptionsManager.Localize(groundEffectInfo.Name)
-                            : OptionsManager.Localize(groundEffectNetworkInfo.Title);
+
+                        var title = groundEffectNetworkInfo.ActionInfo == null || string.IsNullOrEmpty(groundEffectNetworkInfo.ActionInfo.GroundEffectTitleOverride)
+                            ? groundEffectInfo.Name
+                            : groundEffectNetworkInfo.ActionInfo.GroundEffectTitleOverride;
                         var descriptionExpression = groundEffectInfo.ActionStatuses == null || groundEffectInfo.ActionStatuses.Length == 0
-                            ? GUIManager.instance.tooltip.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.Description),
+                            ? __instance.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.Description),
                                 groundEffectInfo.DescriptionExpressions, NetworkingManager.Instance.NetworkManager.Root.WorldCharacter,
                                 null, __instance.Description.fontSize)
-                            : GUIManager.instance.tooltip.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.ActionStatuses[0].Description),
+                            : __instance.ApplyDescriptionExpressions(OptionsManager.Localize(groundEffectInfo.ActionStatuses[0].Description),
                                 groundEffectInfo.ActionStatuses[0].DescriptionExpressions,
                                 NetworkingManager.Instance.NetworkManager.Root.WorldCharacter, null, __instance.Description.fontSize);
 
@@ -308,15 +309,15 @@ namespace eradev.stolenrealm.BetterTooltips
                             ? Game.Instance.GroundEffects[groundEffectNetworkInfo.GroundEffectInfoIndex].TurnsToExpire - GameLogic.instance.turnNumber
                             : 0;
 
-                        key =  $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{descriptionExpression}";
+                        key =  $"<color=#CBB396><size=17>{OptionsManager.Localize(title)}[Stacks]</size></color>\n{descriptionExpression}";
                     }
 
                     if (groundEffectNetworkInfo.ActionInfoIndex > -1)
                     {
-                        var actionInfo = groundEffectNetworkInfo.ActionInfo;
-                        var title = string.IsNullOrWhiteSpace(groundEffectNetworkInfo.Title)
-                            ? OptionsManager.Localize(actionInfo.ActionName)
-                            : OptionsManager.Localize(groundEffectNetworkInfo.Title);
+                        var actionInfo = groundEffectNetworkInfo.ActionInfo!;
+                        var title = string.IsNullOrWhiteSpace(actionInfo.GroundEffectTitleOverride)
+                            ? actionInfo.ActionName
+                            : actionInfo.GroundEffectTitleOverride;
 
                         // Only the host has access to this list.
                         var foundGroundEffect = GameLogic.instance.GroundEffects.FirstOrDefault(x => x.EffectID == groundEffectNetworkInfo.ID);
@@ -325,7 +326,41 @@ namespace eradev.stolenrealm.BetterTooltips
                             ? 0
                             : (int)Math.Ceiling((decimal)(foundGroundEffect.ExpireTurnNumber - GameLogic.instance.turnNumber) / GameLogic.instance.NumberOfTeams);
 
-                        key += $"<color=#CBB396><size=17>{title}[Stacks]</size></color>\n{OptionsManager.Localize(groundEffectNetworkInfo.Description)}";
+                        key += $"<color=#CBB396><size=17>{OptionsManager.Localize(title)}[Stacks]</size></color>";
+
+                        if (!string.IsNullOrEmpty(actionInfo.GroundEffectDescription))
+                        {
+                            var groundEffectDescription = "";
+
+                            if (actionInfo.GroundEffectDescriptionActionRef == null)
+                            {
+                                if (actionInfo.GroundEffectDescriptionActionStatusRef == null)
+                                {
+                                    groundEffectDescription = OptionsManager.Localize(actionInfo.GroundEffectDescription);
+                                }
+                                else
+                                {
+                                    groundEffectDescription = __instance.GetDamageString(
+                                        OptionsManager.Localize(actionInfo.GroundEffectDescription),
+                                        actionInfo.GroundEffectDescriptionActionStatusRef,
+                                        groundEffectNetworkInfo.Character, 
+                                        null);
+                                }
+                            }
+                            else
+                            {
+                                groundEffectDescription = __instance.GetDamageString(
+                                    OptionsManager.Localize(actionInfo.GroundEffectDescription),
+                                    actionInfo.GroundEffectDescriptionActionRef,
+                                    groundEffectNetworkInfo.Character,
+                                    null);
+                            }
+
+                            if (!string.IsNullOrEmpty(groundEffectDescription))
+                            {
+                                key += $"\n{groundEffectDescription}";
+                            }
+                        }
                     }
 
                     if (groundEffectNetworkInfo.Character != null)
