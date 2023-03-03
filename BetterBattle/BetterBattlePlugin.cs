@@ -181,7 +181,10 @@ namespace eradev.stolenrealm.BetterBattle
                                 ? actionInfo.GetSimpleRange(character, target).ToString()
                                 : "Special";
 
-                        if (!canCastInfo.CanCast || !canCastInfo.NotYetActivated || statusEffect == null || !statusEffect.Infinite ||
+                        if (!canCastInfo.CanCast ||
+                            !canCastInfo.NotYetActivated ||
+                            statusEffect == null ||
+                            !statusEffect.Infinite ||
                             rangeText != "0")
                         {
                             continue;
