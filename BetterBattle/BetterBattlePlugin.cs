@@ -1,5 +1,8 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -20,8 +23,24 @@ namespace eradev.stolenrealm.BetterBattle
         private const bool IsAutoCastAurasDisabledDefault = false;
         private const string CmdToggleAutoCastAurasDefault = "t_auras";
 
+        private const bool IsConvertExpGoldDisabledDefault = false;
+        private const string CmdToggleConvertExpGoldDefault = "t_expgold";
+
+        private const bool IsDisplayLootInConsoleDisabledDefault = true;
+
+        private const bool IsRemoveDropsLimitDisabledDefault = false;
+        private const string CmdToggleRemoveDropsLimitDefault = "t_dropslimit";
+
         private static ConfigEntry<string> _cmdToggleAutoCastAuras;
         private static ConfigEntry<bool> _isAutoCastAurasDisabled;
+
+        private static ConfigEntry<bool> _isDisplayLootInConsoleDisabled;
+
+        private static ConfigEntry<string> _cmdToggleConvertExpGold;
+        private static ConfigEntry<bool> _isConvertExpGoldDisabled;
+
+        private static ConfigEntry<string> _cmdToggleRemoveDropsLimit;
+        private static ConfigEntry<bool> _isRemoveDropsLimitDisabled;
 
         // ReSharper disable once NotAccessedField.Local
         private static ManualLogSource _log;
@@ -31,13 +50,27 @@ namespace eradev.stolenrealm.BetterBattle
         {
             _log = Logger;
 
-            _isAutoCastAurasDisabled = Config.Bind("General", "autocastauras_disabled", IsAutoCastAurasDisabledDefault, "Disable auto-cast auras at the start of battles");
+            _isAutoCastAurasDisabled = Config.Bind("General", "autocastauras_disabled", IsAutoCastAurasDisabledDefault,
+                "Disable auto-cast auras at the start of battles");
+            _isConvertExpGoldDisabled = Config.Bind("General", "convertexpgold_disabled", IsConvertExpGoldDisabledDefault,
+                "Disable convert EXP to gold when your character reached max level");
+            _isDisplayLootInConsoleDisabled = Config.Bind("General", "displaylootinconsole_disabled", IsDisplayLootInConsoleDisabledDefault,
+                "Disable display loot in console");
+            _isRemoveDropsLimitDisabled = Config.Bind("General", "removedropslimit_disabled", IsRemoveDropsLimitDisabledDefault,
+                "Disable remove drops limit");
 
-            _cmdToggleAutoCastAuras = Config.Bind("Commands", "autocastauras_toggle", CmdToggleAutoCastAurasDefault, "Toggle auto-cast auras");
+            _cmdToggleAutoCastAuras =
+                Config.Bind("Commands", "autocastauras_toggle", CmdToggleAutoCastAurasDefault, "Toggle auto-cast auras");
+            _cmdToggleConvertExpGold = Config.Bind("Commands", "convertexpgold_toggle", CmdToggleConvertExpGoldDefault,
+                "Toggle convert EXP to gold when your character reached max level");
+            _cmdToggleRemoveDropsLimit = Config.Bind("Commands", "removedropslimit_toggle", CmdToggleRemoveDropsLimitDefault,
+                "Toggle remove drops limit");
 
             CommandHandler.RegisterCommandsEvt += (_, _) =>
             {
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleAutoCastAuras);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleConvertExpGold);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleRemoveDropsLimit);
             };
 
             CommandHandler.HandleCommandEvt += (_, command) =>
@@ -46,7 +79,22 @@ namespace eradev.stolenrealm.BetterBattle
                 {
                     _isAutoCastAurasDisabled.Value = !_isAutoCastAurasDisabled.Value;
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully {(_isAutoCastAurasDisabled.Value ? "disabled" : "enabled")} auto-cast auras");
+                    CommandHandler.DisplayMessage(
+                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isAutoCastAurasDisabled.Value ? "disabled" : "enabled")} auto-cast auras");
+                }
+                else if (command.Name.Equals(_cmdToggleConvertExpGold.Value))
+                {
+                    _isConvertExpGoldDisabled.Value = !_isConvertExpGoldDisabled.Value;
+
+                    CommandHandler.DisplayMessage(
+                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isConvertExpGoldDisabled.Value ? "disabled" : "enabled")} convert EXP to gold");
+                }
+                else if (command.Name.Equals(_cmdToggleRemoveDropsLimit.Value))
+                {
+                    _isRemoveDropsLimitDisabled.Value = !_isRemoveDropsLimitDisabled.Value;
+
+                    CommandHandler.DisplayMessage(
+                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isRemoveDropsLimitDisabled.Value ? "disabled" : "enabled")} remove drops limit");
                 }
             };
 
@@ -133,7 +181,8 @@ namespace eradev.stolenrealm.BetterBattle
                                 ? actionInfo.GetSimpleRange(character, target).ToString()
                                 : "Special";
 
-                        if (!canCastInfo.CanCast || !canCastInfo.NotYetActivated || statusEffect == null || !statusEffect.Infinite || rangeText != "0")
+                        if (!canCastInfo.CanCast || !canCastInfo.NotYetActivated || statusEffect == null || !statusEffect.Infinite ||
+                            rangeText != "0")
                         {
                             continue;
                         }
@@ -151,6 +200,63 @@ namespace eradev.stolenrealm.BetterBattle
                 }
 
                 character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
+            }
+        }
+
+        [HarmonyPatch(typeof(Character), "GiveExperience")]
+        public class CharacterGiveExperiencePatch
+        {
+            [UsedImplicitly]
+            private static bool Prefix(Character __instance, float expValue, bool showMessage)
+            {
+                if (_isConvertExpGoldDisabled.Value || __instance.Level < __instance.MaxLevel)
+                {
+                    return true;
+                }
+
+                __instance.GiveGold(expValue, 1f, showMessage);
+
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(GameLogic), "GenerateLoot")]
+        public class GameLogicGenerateLootPatch
+        {
+            [HarmonyTranspiler]
+            [UsedImplicitly]
+            public static IEnumerable<CodeInstruction> RemoveDropsLimit(IEnumerable<CodeInstruction> instructions)
+            {
+                var codeInstructionList = new List<CodeInstruction>(instructions);
+
+                if (!_isRemoveDropsLimitDisabled.Value)
+                {
+                    var index = codeInstructionList.FindIndex(codeInstruction => codeInstruction.opcode == OpCodes.Ldc_I4_7);
+                    codeInstructionList[index] = new CodeInstruction(OpCodes.Ldc_I4, int.MaxValue);
+                }
+
+                foreach (var codeInstruction in codeInstructionList)
+                {
+                    yield return codeInstruction;
+                }
+            }
+
+            [UsedImplicitly]
+            private static void Postfix(List<Item> __result)
+            {
+                if (_isDisplayLootInConsoleDisabled.Value)
+                {
+                    return;
+                }
+
+                var itemCount = __result.Sum(x => x.numStacks);
+
+                _log.LogInfo($"Looted {itemCount} item{(itemCount > 0 ? "s" : "")}:");
+
+                foreach (var item in __result)
+                {
+                    _log.LogInfo($"  {Regex.Replace(OptionsManager.Localize(item.ItemName), "<.*?>", string.Empty)}{(item.numStacks > 1 ? $" ({item.numStacks})" : "")}");
+                }
             }
         }
     }

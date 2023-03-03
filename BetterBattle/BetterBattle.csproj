@@ -6,8 +6,10 @@
     <Description>Changes to make battles better.
 
 * Right clicking on a self target skill will cast it automatically
-* Auras are activated automatically at the start of the battle (Toggleable)</Description>
-    <Version>1.0.0</Version>
+* Auras are activated automatically at the start of the battle (Toggleable)
+* Convert EXP gained into gold when your character reached max level (Toggleable)
+* Remove the item drops limit (Toggleable)</Description>
+    <Version>1.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterBattle</RootNamespace>

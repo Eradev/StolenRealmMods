@@ -9,7 +9,9 @@ Released mods are available to download at [ModWorkshop](https://modworkshop.net
 Changes to make the battles better:
 
 * Right clicking on a self target skill will cast it automatically;
-* Auras are activated automatically at the start of the battle (Toggleable)
+* Auras are activated automatically at the start of the battle (Toggleable);
+* Convert EXP gained into gold when your character reached max level (Toggleable);
+* Remove the item drops limit (Toggleable).
 
 ## Better Message Window
 
@@ -51,10 +53,6 @@ Free respec.
 ## Item Mods Color
 
 Colorful item names.
-
-## Remove Drops Limit
-
-Removes the drops limit.
 
 ## Skill Points
 
