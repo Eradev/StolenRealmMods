@@ -11,6 +11,7 @@ namespace eradev.stolenrealm.BetterShopSelection
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class BetterShopSelectionPlugin : BaseUnityPlugin
     {
+        [UsedImplicitly]
         private void Awake()
         {
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
@@ -23,7 +24,6 @@ namespace eradev.stolenrealm.BetterShopSelection
         {
             [UsedImplicitly]
             private static bool Prefix(
-                ref ShopManager __instance,
                 // ReSharper disable once IdentifierTypo
                 ref Dictionary<Shopkeeper, List<Item>> ___shopkeepItemDict,
                 int level,
@@ -57,8 +57,7 @@ namespace eradev.stolenrealm.BetterShopSelection
                     var itemTypeChance = itemTypesChance;
                     var availableLoot = (shopkeeper.itemPoolType == UniversalLootTableType.Unassigned
                         ? Game.Instance.WorldLootItems
-                        : Game.Instance.Items.Where(x => x.AllowInAllShops || x.AllowedShops.Contains(shopkeeper)))
-                        .ToList();
+                        : Game.Instance.Items.Where(x => x.AllowInAllShops || x.AllowedShops.Contains(shopkeeper))).ToList();
 
                     if (itemTypeChance.useAll)
                     {
@@ -86,7 +85,7 @@ namespace eradev.stolenrealm.BetterShopSelection
 
                                 if (list.Count > 0)
                                 {
-                                    itemInfos.Add(list[UnityEngine.Random.Range(0, list.Count)]);
+                                    itemInfos.Add(list[Random.Range(0, list.Count)]);
                                 }
                             }
                             else
@@ -95,7 +94,7 @@ namespace eradev.stolenrealm.BetterShopSelection
 
                                 if (list.Count > 0)
                                 {
-                                    itemInfos.Add(list[UnityEngine.Random.Range(0, list.Count)]);
+                                    itemInfos.Add(list[Random.Range(0, list.Count)]);
                                 }
                             }
                         }
@@ -104,7 +103,7 @@ namespace eradev.stolenrealm.BetterShopSelection
  
                 foreach (var itemInfo in itemInfos)
                 {
-                    var iLvl = Mathf.Min(30, randomItemLevelList[UnityEngine.Random.Range(0, randomItemLevelList.Count)]);
+                    var iLvl = Mathf.Min(30, randomItemLevelList[Random.Range(0, randomItemLevelList.Count)]);
 
                     var rollModsLevel = !shopkeeper.allowTierDrops || iLvl < 30
                         ? 0
