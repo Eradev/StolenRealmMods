@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Burst2Flame;
 using Burst2Flame.Observable;
+using eradev.stolenrealm.CommandHandlerNS;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -11,9 +13,16 @@ using UnityEngine.UI;
 
 namespace eradev.stolenrealm.BetterBattle
 {
+    [BepInDependency("eradev.stolenrealm.CommandHandler")]
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class BetterBattlePlugin : BaseUnityPlugin
     {
+        private const bool IsAutoCastAurasDisabledDefault = false;
+        private const string CmdToggleAutoCastAurasDefault = "t_autocastaura";
+
+        private static ConfigEntry<string> _cmdToggleAutoCastAuras;
+        private static ConfigEntry<bool> _isAutoCastAurasDisabled;
+
         // ReSharper disable once NotAccessedField.Local
         private static ManualLogSource _log;
 
@@ -21,6 +30,25 @@ namespace eradev.stolenrealm.BetterBattle
         private void Awake()
         {
             _log = Logger;
+
+            _isAutoCastAurasDisabled = Config.Bind("General", "autocastauras_disabled", IsAutoCastAurasDisabledDefault, "Disable auto-cast auras at the start of battles");
+
+            _cmdToggleAutoCastAuras = Config.Bind("Commands", "autocastauras_toggle", CmdToggleAutoCastAurasDefault, "Toggle auto-cast auras");
+
+            CommandHandler.RegisterCommandsEvt += (_, _) =>
+            {
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleAutoCastAuras);
+            };
+
+            CommandHandler.HandleCommandEvt += (_, command) =>
+            {
+                if (command.Name.Equals(_cmdToggleAutoCastAuras.Value))
+                {
+                    _isAutoCastAurasDisabled.Value = !_isAutoCastAurasDisabled.Value;
+
+                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully {(_isAutoCastAurasDisabled.Value ? "disabled" : "enabled")} auto-cast auras");
+                }
+            };
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -82,7 +110,7 @@ namespace eradev.stolenrealm.BetterBattle
             [UsedImplicitly]
             private static void Postfix(GameLogic __instance)
             {
-                if (__instance.currentTeamTurnIndex != 0 || __instance.numPlayerTurnsStarted != 0)
+                if (_isAutoCastAurasDisabled.Value || __instance.currentTeamTurnIndex != 0 || __instance.numPlayerTurnsStarted != 0)
                 {
                     return;
                 }
