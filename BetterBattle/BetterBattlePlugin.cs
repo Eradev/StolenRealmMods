@@ -1,9 +1,12 @@
-﻿using BepInEx;
+﻿using System.Collections;
+using System.Linq;
+using BepInEx;
 using BepInEx.Logging;
 using Burst2Flame;
 using Burst2Flame.Observable;
 using HarmonyLib;
 using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace eradev.stolenrealm.BetterBattle
@@ -70,6 +73,56 @@ namespace eradev.stolenrealm.BetterBattle
                 }
 
                 selectedCharacter.ExecuteAction(selectedCharacter.Character.Cell, actionInfo);
+            }
+        }
+
+        [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
+        public class GameLogicStartNewTurnSequencePatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(GameLogic __instance)
+            {
+                if (__instance.currentTeamTurnIndex != 0 || __instance.numPlayerTurnsStarted != 0)
+                {
+                    return;
+                }
+
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                {
+                    foreach (var actionInfo in character.Actions.Select(x => x.ActionInfo).ToList())
+                    {
+                        var canCastInfo = character.PlayerMovement.CanCast(new StructList<HexCell>
+                        {
+                            null
+                        }, actionInfo);
+
+                        var statusEffect = actionInfo.StatusEffects.FirstOrDefault();
+
+                        var target = (TargetInfo)actionInfo.Targets[0];
+                        var rangeText = !string.IsNullOrEmpty(actionInfo.TargetTextOverride)
+                            ? OptionsManager.Localize(actionInfo.TargetTextOverride)
+                            : target.UseSimpleTargetingRange
+                                ? actionInfo.GetSimpleRange(character, target).ToString()
+                                : "Special";
+
+                        if (!canCastInfo.CanCast || !canCastInfo.NotYetActivated || statusEffect == null || !statusEffect.Infinite || rangeText != "0")
+                        {
+                            continue;
+                        }
+
+                        __instance.StartCoroutine(QueueCast(character, actionInfo));
+                    }
+                }
+            }
+
+            private static IEnumerator QueueCast(Character character, ActionInfo actionInfo)
+            {
+                while (character.Acting)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
+
+                character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
             }
         }
     }
