@@ -159,7 +159,6 @@ namespace eradev.stolenrealm.BetterTooltips
                 PersistentDurationType persistentDurationType,
                 Character source,
                 Character target,
-                string header,
                 float level)
             {
                 var actionStatusInfoClone = actionStatusInfo.Clone();
