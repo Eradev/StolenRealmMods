@@ -4,6 +4,13 @@ Mods for Stolen Realm.
 
 Released mods are available to download at [ModWorkshop](https://modworkshop.net/user/124854).
 
+## Better Battle
+
+Changes to make the battles better:
+
+* Right clicking on a self target skill will cast it automatically;
+* Auras are activated automatically at the start of the battle (Toggleable)
+
 ## Better Message Window
 
 Changes to make the message window better:

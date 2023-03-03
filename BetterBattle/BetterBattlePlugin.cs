@@ -18,7 +18,7 @@ namespace eradev.stolenrealm.BetterBattle
     public class BetterBattlePlugin : BaseUnityPlugin
     {
         private const bool IsAutoCastAurasDisabledDefault = false;
-        private const string CmdToggleAutoCastAurasDefault = "t_autocastaura";
+        private const string CmdToggleAutoCastAurasDefault = "t_auras";
 
         private static ConfigEntry<string> _cmdToggleAutoCastAuras;
         private static ConfigEntry<bool> _isAutoCastAurasDisabled;

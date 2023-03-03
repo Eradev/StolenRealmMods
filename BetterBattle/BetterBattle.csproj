@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>eradev.stolenrealm.BetterBattle</AssemblyName>
-    <Description>* Right clicking on a skill will cast on self if it's a valid target.
-* Auras are activated automatically at the start of the battle if you have enough Mana.</Description>
+    <Description>Changes to make battles better.
+
+* Right clicking on a self target skill will cast it automatically
+* Auras are activated automatically at the start of the battle (Toggleable)</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
