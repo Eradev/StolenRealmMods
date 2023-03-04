@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>eradev.stolenrealm.BetterShopSelection</AssemblyName>
-    <Description>Shopkeepers have better items.</Description>
+    <Description>Shopkeepers have better items.
+
+* Items in shops will more likely come with mods;
+* You can upgrade an item's tier when it reaches your character max level at the upgarde merchant.</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>

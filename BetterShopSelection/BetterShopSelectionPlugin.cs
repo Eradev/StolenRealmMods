@@ -1,19 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
+using BepInEx.Logging;
 using Burst2Flame;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace eradev.stolenrealm.BetterShopSelection
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class BetterShopSelectionPlugin : BaseUnityPlugin
     {
+        // ReSharper disable once NotAccessedField.Local
+        private static ManualLogSource _log;
+
         [UsedImplicitly]
         private void Awake()
         {
+            _log = Logger;
+
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
@@ -157,6 +165,67 @@ namespace eradev.stolenrealm.BetterShopSelection
                 ___shopkeepItemDict[shopkeeper] = shopKeeperItems.OrderBy(x => x.ItemInfo.ItemType).ThenByDescending(x => x.ItemInfo.Rarity).ToList();
 
                 return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(ItemUpgradeManager), "Init")]
+        public class ItemUpgradeManagerInitPatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(
+                ItemUpgradeManager __instance,
+                Character character,
+                // ReSharper disable once InconsistentNaming
+                ref Inventory ____ItemList,
+                ref Dictionary<Item, Item> ___upgradeDict)
+            {
+                if (character.Level < character.MaxLevel)
+                {
+                    return;
+                }
+
+                var upgradableTierItems = character.EquippedItems
+                    .Where(x => x.itemLevel == (int)character.MaxLevel && (x.EndGameMod == null || x.EndGameMod.EndGameItemModTierType != EndGameItemModTierType.Tier3))
+                    .ToList();
+
+                ____ItemList.AllItems.AddRange(upgradableTierItems);
+                ____ItemList.InitializeInventory(____ItemList.AllItems, showEquipped: true);
+
+                var itemMods = Game.Instance.ItemMods.Where(x => x.ItemModType == ItemModType.EndGame).ToList();
+                var tier1Mod = itemMods.FirstOrDefault(x => x.EndGameItemModTierType == EndGameItemModTierType.Tier1);
+                var tier2Mod = itemMods.FirstOrDefault(x => x.EndGameItemModTierType == EndGameItemModTierType.Tier2);
+                var tier3Mod = itemMods.FirstOrDefault(x => x.EndGameItemModTierType == EndGameItemModTierType.Tier3);
+
+                foreach (var item in upgradableTierItems)
+                {
+                    var itemCopy = GameLogic.instance.CreateItemCopy(item);
+
+                    if (item.EndGameMod == null)
+                    {
+                        itemCopy.AddItemMod(tier1Mod);
+                    }
+                    else
+                    {
+                        switch (item.EndGameMod.EndGameItemModTierType)
+                        {
+                            case EndGameItemModTierType.Tier1:
+                                itemCopy.AddItemMod(tier2Mod);
+
+                                break;
+
+                            case EndGameItemModTierType.Tier2:
+                                itemCopy.AddItemMod(tier3Mod);
+
+                                break;
+                        }
+                    }
+                    itemCopy.Init();
+
+                    ___upgradeDict[item] = itemCopy;
+                }
+
+                __instance.SelectUpgradeItem(____ItemList.CurrentItemSlots.FirstOrDefault());
+                __instance.NoItemsInventory.SetActive(!____ItemList.AllItems.Any());
             }
         }
 

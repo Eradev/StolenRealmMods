@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
+using Burst2Flame;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -13,12 +14,14 @@ namespace DataDumper
         private static ConfigEntry<string> _difficulties;
         private static ConfigEntry<string> _gamblingChance;
         private static ConfigEntry<string> _gamblingRolls;
+        private static ConfigEntry<string> _itemMods;
 
         private void Awake()
         {
             _difficulties = Config.Bind("General", "Difficulties", string.Empty);
             _gamblingChance = Config.Bind("General", "Gambling chance", string.Empty);
             _gamblingRolls = Config.Bind("General", "Gambling rolls", string.Empty);
+            _itemMods = Config.Bind("General", "Item mods", string.Empty);
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -45,6 +48,10 @@ namespace DataDumper
                 var gamblingRolls = GamblingManager.Instance.GamblingRolls;
 
                 _gamblingRolls.Value = JsonConvert.SerializeObject(gamblingRolls);
+
+                var itemMods = Game.Instance.ItemMods;
+
+                _itemMods.Value = JsonConvert.SerializeObject(itemMods);
             }
         }
     }
