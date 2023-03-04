@@ -10,46 +10,46 @@ namespace eradev.stolenrealm.CommandHandlerNS
 {
     public class CommandHandler
     {
-        public const char CmdKeyDefault = '/';
+        public const char CommandKeyDefault = '/';
 
         public static event EventHandler RegisterCommandsEvt;
         public static event EventHandler<CommandEventArgs> HandleCommandEvt;
 
-        protected static CommandHandler InstanceInternal;
-        protected static ManualLogSource LoggerInternal;
-        protected static char CommandKeyInternal;
-        protected static Dictionary<string, string> AvailableCommandsInternal = new();
+        private static CommandHandler _instanceInternal;
+        private static ManualLogSource _loggerInternal;
+        private static readonly Dictionary<string, string> AvailableCommandsInternal = new();
 
-        protected CommandHandler() { }
+        private CommandHandler() { }
 
-        public static CommandHandler Inst => InstanceInternal ??= new CommandHandler();
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static CommandHandler Inst => _instanceInternal ??= new CommandHandler();
         public static ReadOnlyDictionary<string, string> AvailableCommands => new(AvailableCommandsInternal);
-        public static char CommandKey => CommandKeyInternal;
+        public static char CommandKey { get; private set; }
 
-        public void SetLogger(ManualLogSource logger)
+        public static void SetLogger(ManualLogSource logger)
         {
-            LoggerInternal = logger;
+            _loggerInternal = logger;
         }
 
         public static void TrySetCommandKey(ref ConfigEntry<string> commandKey)
         {
             if (commandKey.Value.Length > 1)
             {
-                LogWarning($"The command key must be a char. Defaulting to '{CmdKeyDefault}'");
+                LogWarning($"The command key must be a char. Defaulting to '{CommandKeyDefault}'");
 
-                commandKey.Value = CmdKeyDefault.ToString();
+                commandKey.Value = CommandKeyDefault.ToString();
 
             }
             else if (char.IsLetterOrDigit(commandKey.Value[0]) || char.IsWhiteSpace(commandKey.Value[0]))
             {
-                LogWarning($"The command key cannot be alphanumeric or a space char. Defaulting to '{CmdKeyDefault}'");
+                LogWarning($"The command key cannot be alphanumeric or a space char. Defaulting to '{CommandKeyDefault}'");
 
-                commandKey.Value = CmdKeyDefault.ToString();
+                commandKey.Value = CommandKeyDefault.ToString();
             }
 
-            CommandKeyInternal = commandKey.Value[0];
+            CommandKey = commandKey.Value[0];
 
-            var message = $"Command key set to '{CommandKeyInternal}'";
+            var message = $"Command key set to '{CommandKey}'";
             LogInfo(message);
         }
 
@@ -87,7 +87,7 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
             var trimmedMessage = message.TrimEnd();
 
-            if (!trimmedMessage.StartsWith(CommandKeyInternal.ToString()))
+            if (!trimmedMessage.StartsWith(CommandKey.ToString()))
             {
                 return false;
             }
@@ -138,11 +138,12 @@ namespace eradev.stolenrealm.CommandHandlerNS
             MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void LogDebug(object data)
         {
-            if (LoggerInternal != null)
+            if (_loggerInternal != null)
             {
-                LoggerInternal.LogDebug(data);
+                _loggerInternal.LogDebug(data);
             }
             else
             {
@@ -150,11 +151,12 @@ namespace eradev.stolenrealm.CommandHandlerNS
             }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void LogInfo(object data)
         {
-            if (LoggerInternal != null)
+            if (_loggerInternal != null)
             {
-                LoggerInternal.LogInfo(data);
+                _loggerInternal.LogInfo(data);
             }
             else
             {
@@ -162,11 +164,12 @@ namespace eradev.stolenrealm.CommandHandlerNS
             }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void LogWarning(object data)
         {
-            if (LoggerInternal != null)
+            if (_loggerInternal != null)
             {
-                LoggerInternal.LogWarning(data);
+                _loggerInternal.LogWarning(data);
             }
             else
             {
@@ -174,11 +177,12 @@ namespace eradev.stolenrealm.CommandHandlerNS
             }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void LogError(object data)
         {
-            if (LoggerInternal != null)
+            if (_loggerInternal != null)
             {
-                LoggerInternal.LogError(data);
+                _loggerInternal.LogError(data);
             }
             else
             {

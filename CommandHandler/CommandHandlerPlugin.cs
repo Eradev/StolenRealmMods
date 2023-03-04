@@ -22,13 +22,13 @@ namespace eradev.stolenrealm.CommandHandlerNS
         [UsedImplicitly]
         private void Awake()
         {
-            _cmdKey = Config.Bind("General", "commandKey", CommandHandler.CmdKeyDefault.ToString(), "(char) Command key. Each command sent to the chat must start with this key. Cannot be alphanumeric or a whitespace");
+            _cmdKey = Config.Bind("General", "commandKey", CommandHandler.CommandKeyDefault.ToString(), "(char) Command key. Each command sent to the chat must start with this key. Cannot be alphanumeric or a whitespace");
 
             _cmdList = Config.Bind("Commands", "list", CmdListDefault, "List all available commands");
             _cmdClear = Config.Bind("Commands", "clear", CmdClearDefault, "Clear the chat window");
             _cmdSetCommandKey = Config.Bind("Commands", "setCommandKey", CmdSetCommandKeyDefault, "[Args (char, non-alphanumeric)] Set a new command key");
 
-            CommandHandler.Inst.SetLogger(Logger);
+            CommandHandler.SetLogger(Logger);
             CommandHandler.TrySetCommandKey(ref _cmdKey);
 
             CommandHandler.RegisterCommandsEvt += (_, _) =>
@@ -76,7 +76,7 @@ namespace eradev.stolenrealm.CommandHandlerNS
                 {
                     if (command.Args.Count < 1 || !char.TryParse(command.Args[0], out var newKey) || char.IsLetterOrDigit(newKey) || char.IsWhiteSpace(newKey))
                     {
-                        CommandHandler.DisplayMessage("<color=red>Error:</color> You must specify a valid value");
+                        CommandHandler.DisplayError("You must specify a valid value");
 
                         return;
                     }

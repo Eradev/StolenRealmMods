@@ -6,8 +6,10 @@ namespace eradev.stolenrealm.CommandHandlerNS
 {
     public class CommandEventArgs : EventArgs
     {
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global
         public string Name;
 
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global
         public List<string> Args;
 
         public CommandEventArgs(IReadOnlyList<string> args)
