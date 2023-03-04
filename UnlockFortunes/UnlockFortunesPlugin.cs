@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Burst2Flame;
 using HarmonyLib;
@@ -12,11 +13,22 @@ namespace eradev.stolenrealm.UnlockFortunes
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class UnlockFortunesPlugin : BaseUnityPlugin
     {
+        private const bool IsUnlockAllFortunesMaxedEnabledDefault = false;
+        private const bool IsUnlockFortuneAllPartyEnabledDefault = true;
+
+        private static ConfigEntry<bool> _isUnlockAllFortunesMaxedEnabled;
+        private static ConfigEntry<bool> _isUnlockFortuneAllPartyEnabled;
+
         private static ManualLogSource _log;
 
         private void Awake()
         {
             _log = Logger;
+
+            _isUnlockAllFortunesMaxedEnabled = Config.Bind("General", "unlockallfortunesmaxed_enabled", IsUnlockAllFortunesMaxedEnabledDefault,
+                "Enable always unlock all fortunes at maxed level (On game load, and on character creation)");
+            _isUnlockFortuneAllPartyEnabled = Config.Bind("General", "unlockfortuneallparty_enabled", IsUnlockFortuneAllPartyEnabledDefault,
+                "Enable unlock fortune on all your party when you unlock on one");
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -29,9 +41,62 @@ namespace eradev.stolenrealm.UnlockFortunes
             [UsedImplicitly]
             private static void Postfix(ref List<Character> __result)
             {
+                if (!_isUnlockAllFortunesMaxedEnabled.Value)
+                {
+                    return;
+                }
+
                 foreach (var character in __result)
                 {
                     UnlockFortunes(character);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Character), "AddFortune")]
+        public class CharacterAddFortunePatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(string guid, float level)
+            {
+                if (!_isUnlockFortuneAllPartyEnabled.Value)
+                {
+                    return;
+                }
+
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                {
+                    var hasChanges = false;
+
+                    var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == guid);
+
+                    if (characterFortune == null)
+                    {
+                        character.FortuneData.Add(new FortuneSaveData
+                        {
+                            Guid = guid,
+                            Level = level,
+                            EquippedSlotIndex = -1,
+                            IsNew = true
+                        });
+
+                        hasChanges = true;
+                    }
+                    else if (characterFortune.Level < level)
+                    {
+                        characterFortune.Level = level;
+
+                        hasChanges = true;
+                    }
+
+                    if (hasChanges)
+                    {
+                        character.FortuneData = character.FortuneData
+                            .OrderBy(x => x.GetLocalizedName())
+                            .ToList();
+
+                        character.Save(true);
+                    }
                 }
             }
         }
@@ -42,11 +107,16 @@ namespace eradev.stolenrealm.UnlockFortunes
             [UsedImplicitly]
             private static void Postfix(ref Character __result)
             {
+                if (!_isUnlockAllFortunesMaxedEnabled.Value)
+                {
+                    return;
+                }
+
                 UnlockFortunes(__result);
             }
         }
 
-        private static void UnlockFortunes(Character character)
+        private static void UnlockFortunes(Character character, float level = 30f)
         {
             var characterName = string.IsNullOrEmpty(character.CharacterName)
                 ? PresetManager.Instance.nameField.text // New character
@@ -63,7 +133,7 @@ namespace eradev.stolenrealm.UnlockFortunes
                     character.FortuneData.Add(new FortuneSaveData
                     {
                         Guid = fortune.Guid.ToString(),
-                        Level = 30f,
+                        Level = level,
                         EquippedSlotIndex = -1,
                         IsNew = true
                     });
@@ -72,18 +142,22 @@ namespace eradev.stolenrealm.UnlockFortunes
 
                     _log.LogDebug($"[{characterName}] Unlocked {fortune.Name}");
                 }
-                else if (characterFortune.Level < 30f)
+                else if (characterFortune.Level < level)
                 {
-                    characterFortune.Level = 30f;
+                    characterFortune.Level = level;
 
                     hasChanges = true;
 
-                    _log.LogDebug($"[{characterName}] Upgraded {fortune.Name} to level 30");
+                    _log.LogDebug($"[{characterName}] Upgraded {fortune.Name} to level {level}");
                 }
             }
 
             if (hasChanges)
             {
+                character.FortuneData = character.FortuneData
+                    .OrderBy(x => x.GetLocalizedName())
+                    .ToList();
+
                 character.Save(true);
             }
         }
