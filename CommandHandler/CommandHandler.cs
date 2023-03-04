@@ -138,6 +138,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
             MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
         }
 
+        public static void DisplayNotification(string message)
+        {
+            NotificationManager.instance.DisplayNotification(message);
+        }
+
         // ReSharper disable once MemberCanBePrivate.Global
         public static void LogDebug(object data)
         {
