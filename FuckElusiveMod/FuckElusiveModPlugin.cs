@@ -12,6 +12,7 @@ namespace eradev.stolenrealm.FuckElusiveMod
     {
         private static ManualLogSource _log;
 
+        [UsedImplicitly]
         private void Awake()
         {
             _log = Logger;

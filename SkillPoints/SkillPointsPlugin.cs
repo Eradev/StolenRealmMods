@@ -42,7 +42,7 @@ namespace eradev.stolenrealm.SkillPoints
                 {
                     if (command.Args.Count < 1 || !float.TryParse(command.Args[0], out var newValue) || newValue < 0.0f)
                     {
-                        CommandHandler.DisplayMessage("<color=red>Error:</color> You must specify a value greater or equal to 0.0");
+                        CommandHandler.DisplayError("You must specify a value greater or equal to 0.0");
 
                         return;
                     }
@@ -57,7 +57,7 @@ namespace eradev.stolenrealm.SkillPoints
                     }
                     GUIManager.instance.UpdateUnspentPointsUI();
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully set the skill points per level to {newValue}");
+                    CommandHandler.DisplayMessage($"Successfully set the skill points per level to {newValue}", PluginInfo.PLUGIN_NAME);
                 }
             };
 

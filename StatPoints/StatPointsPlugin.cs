@@ -36,7 +36,7 @@ namespace eradev.stolenrealm.StatPoints
                 {
                     if (command.Args.Count < 1 || !int.TryParse(command.Args[0], out var newValue) || newValue < 0)
                     {
-                        CommandHandler.DisplayMessage("<color=red>Error:</color> You must specify a value greater or equal to 0");
+                        CommandHandler.DisplayError("You must specify a value greater or equal to 0");
 
                         return;
                     }
@@ -47,7 +47,7 @@ namespace eradev.stolenrealm.StatPoints
 
                     GUIManager.instance.UpdateUnspentPointsUI();
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully set the stat points per level to {newValue}");
+                    CommandHandler.DisplayMessage($"Successfully set the stat points per level to {newValue}", PluginInfo.PLUGIN_NAME);
                 }
             };
 

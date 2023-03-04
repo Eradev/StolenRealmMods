@@ -9,7 +9,7 @@
 * Auras are activated automatically at the start of the battle (Toggleable)
 * Convert EXP gained into gold when your character reached max level (Toggleable)
 * Remove the item drops limit (Toggleable)</Description>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterBattle</RootNamespace>

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>eradev.stolenrealm.FasterMovementSpeed</AssemblyName>
     <Description>Configurable movement speed multiplier.</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>eradev.stolenrealm.FasterMovementSpeed</RootNamespace>

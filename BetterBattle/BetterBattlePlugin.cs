@@ -80,21 +80,24 @@ namespace eradev.stolenrealm.BetterBattle
                     _isAutoCastAurasDisabled.Value = !_isAutoCastAurasDisabled.Value;
 
                     CommandHandler.DisplayMessage(
-                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isAutoCastAurasDisabled.Value ? "disabled" : "enabled")} auto-cast auras");
+                        $"Successfully {(_isAutoCastAurasDisabled.Value ? "disabled" : "enabled")} auto-cast auras",
+                        PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdToggleConvertExpGold.Value))
                 {
                     _isConvertExpGoldDisabled.Value = !_isConvertExpGoldDisabled.Value;
 
                     CommandHandler.DisplayMessage(
-                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isConvertExpGoldDisabled.Value ? "disabled" : "enabled")} convert EXP to gold");
+                        $"Successfully {(_isConvertExpGoldDisabled.Value ? "disabled" : "enabled")} convert EXP to gold",
+                        PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdToggleRemoveDropsLimit.Value))
                 {
                     _isRemoveDropsLimitDisabled.Value = !_isRemoveDropsLimitDisabled.Value;
 
                     CommandHandler.DisplayMessage(
-                        $"{PluginInfo.PLUGIN_NAME}: Successfully {(_isRemoveDropsLimitDisabled.Value ? "disabled" : "enabled")} remove drops limit");
+                        $"Successfully {(_isRemoveDropsLimitDisabled.Value ? "disabled" : "enabled")} remove drops limit",
+                        PluginInfo.PLUGIN_NAME);
                 }
             };
 

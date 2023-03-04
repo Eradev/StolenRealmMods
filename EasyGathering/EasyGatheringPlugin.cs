@@ -35,7 +35,8 @@ namespace eradev.stolenrealm.EasyGathering
                 {
                     _isDisabled.Value = !_isDisabled.Value;
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully {(_isDisabled.Value ? "disabled" : "enabled")}");
+                    CommandHandler.DisplayMessage($"Successfully {(_isDisabled.Value ? "disabled" : "enabled")}",
+                        PluginInfo.PLUGIN_NAME);
                 }
             };
 

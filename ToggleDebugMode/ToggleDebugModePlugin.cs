@@ -65,6 +65,13 @@ namespace eradev.stolenrealm.ToggleDebugMode
             {
                 if (command.Name.Equals(_cmdDisplay.Value))
                 {
+                    if (!NetworkingManager.Instance.IsServer)
+                    {
+                        CommandHandler.DisplayError("Only the host can activate the debug mode.");
+
+                        return;
+                    }
+
                     if (!_isEnabled.Value)
                     {
                         EnableDebugMode();
@@ -74,6 +81,13 @@ namespace eradev.stolenrealm.ToggleDebugMode
                 }
                 else if (command.Name.Equals(_cmdToggle.Value))
                 {
+                    if (!NetworkingManager.Instance.IsServer)
+                    {
+                        CommandHandler.DisplayError("Only the host can activate the debug mode.");
+
+                        return;
+                    }
+
                     if (_isEnabled.Value)
                     {
                         DisableDebugMode();
@@ -98,7 +112,7 @@ namespace eradev.stolenrealm.ToggleDebugMode
 
             PlayerPrefs.SetString("DebugModeEnabled", "TRUE");
 
-            CommandHandler.DisplayMessage("Successfully enabled the debug mode.");
+            CommandHandler.BroadcastMessage($"</color=orange>{PluginInfo.PLUGIN_NAME}:</color> The host enabled the debug mode.");
         }
 
         private static void DisableDebugMode()
@@ -136,7 +150,7 @@ namespace eradev.stolenrealm.ToggleDebugMode
             DebugWindow.instance.HideCharacterHoverInfoToggle.isOn = false;
             DebugWindow.instance.HideBasicUIToggle.isOn = false;
 
-            CommandHandler.DisplayMessage("Successfully disabled the debug mode.");
+            CommandHandler.BroadcastMessage("The host disabled the debug mode.");
         }
     }
 }

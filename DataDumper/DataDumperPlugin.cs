@@ -15,6 +15,7 @@ namespace DataDumper
         private static ConfigEntry<string> _gamblingChance;
         private static ConfigEntry<string> _gamblingRolls;
         private static ConfigEntry<string> _itemMods;
+        private static ConfigEntry<string> _fortunes;
 
         private void Awake()
         {
@@ -22,6 +23,7 @@ namespace DataDumper
             _gamblingChance = Config.Bind("General", "Gambling chance", string.Empty);
             _gamblingRolls = Config.Bind("General", "Gambling rolls", string.Empty);
             _itemMods = Config.Bind("General", "Item mods", string.Empty);
+            _fortunes = Config.Bind("General", "Fortunes", string.Empty);
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -52,6 +54,13 @@ namespace DataDumper
                 var itemMods = Game.Instance.ItemMods;
 
                 _itemMods.Value = JsonConvert.SerializeObject(itemMods);
+
+                var fortunes = Game.Instance.Fortunes
+                    .ToDictionary(
+                        fortune => fortune.Name,
+                        fortune => fortune.Guid);
+
+                _fortunes.Value = JsonConvert.SerializeObject(fortunes);
             }
         }
     }

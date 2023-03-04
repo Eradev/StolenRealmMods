@@ -111,8 +111,30 @@ namespace eradev.stolenrealm.CommandHandlerNS
             HandleCommandEvt?.Invoke(Inst, new CommandEventArgs(args));
         }
 
-        public static void DisplayMessage(string message)
+        public static void BroadcastMessage(string message, string source = null)
         {
+            if (!string.IsNullOrWhiteSpace(source))
+            {
+                message = $"<color=orange>{source}:</color> {message}";
+            }
+
+            MessageWindowManager.instance.SendMessageToAll(-1, message, MessageWindowMessageType.Chat, null, null, 0f);
+        }
+
+        public static void DisplayMessage(string message, string source = null)
+        {
+            if (!string.IsNullOrWhiteSpace(source))
+            {
+                message = $"<color=orange>{source}:</color> {message}";
+            }
+
+            MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
+        }
+
+        public static void DisplayError(string message)
+        {
+            message = $"<color=red>Error:</color> {message}";
+
             MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
         }
 

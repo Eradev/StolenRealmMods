@@ -46,20 +46,23 @@ namespace eradev.stolenrealm.FasterMovementSpeed
                 {
                     _isDisabled.Value = !_isDisabled.Value;
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully {(_isDisabled.Value ? "disabled" : "enabled")}");
+                    CommandHandler.DisplayMessage(
+                        $"Successfully {(_isDisabled.Value ? "disabled" : "enabled")}",
+                        PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdSet.Value))
                 {
                     if (command.Args.Count < 1 || !float.TryParse(command.Args[0], out var newValue) || newValue < 1.0f)
                     {
-                        CommandHandler.DisplayMessage("<color=red>Error:</color> You must specify a value greater or equal to 1.0");
+                        CommandHandler.DisplayError("You must specify a value greater or equal to 1.0");
 
                         return;
                     }
 
                     _speedMultiplier.Value = newValue;
 
-                    CommandHandler.DisplayMessage($"{PluginInfo.PLUGIN_NAME}: Successfully set the speed multiplier to {newValue}");
+                    CommandHandler.DisplayMessage($"Successfully set the speed multiplier to {newValue}",
+                        PluginInfo.PLUGIN_NAME);
                 }
             };
 
