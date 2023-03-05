@@ -31,7 +31,7 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
             _cmdList = Config.Bind("Commands", "list", CmdListDefault, "List all available commands");
             _cmdClear = Config.Bind("Commands", "clear", CmdClearDefault, "Clear the chat window");
-            _cmdFindSkill = Config.Bind("Commands", "findskill", CmdFindSkillDefault, "[Args (string)] Find a skill GUID by name");
+            _cmdFindSkill = Config.Bind("Commands", "findskill", CmdFindSkillDefault, "[Args (string)] Search for a skill GUID by name");
             _cmdSetCommandKey = Config.Bind("Commands", "setCommandKey", CmdSetCommandKeyDefault, "[Args (char, non-alphanumeric)] Set a new command key");
 
             CommandHandler.SetLogger(Logger);

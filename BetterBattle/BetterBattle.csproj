@@ -6,7 +6,8 @@
     <Description>Changes to make battles better.
 
 * Right clicking on a self target skill will cast it automatically
-* Auras are activated automatically at the start of the battle (Toggleable)
+* Auto-cast auras at the start of the battle (Toggleable)
+* Auto-cast skills whenever available (Toggleable)
 * Convert EXP gained into gold when your character reached max level (Toggleable)
 * Remove the item drops limit (Toggleable)
 * Remove barrels (Toggleable)</Description>

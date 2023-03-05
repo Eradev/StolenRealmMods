@@ -9,9 +9,11 @@ Released mods are available to download at [ModWorkshop](https://modworkshop.net
 Changes to make the battles better:
 
 * Right clicking on a self target skill will cast it automatically;
-* Auras are activated automatically at the start of the battle (Toggleable);
+* Auto-cast auras at the start of the battle (Toggleable);
+* Auto-cast skills whenever available (Toggleable);
 * Convert EXP gained into gold when your character reached max level (Toggleable);
-* Remove the item drops limit (Toggleable).
+* Remove the item drops limit (Toggleable);
+* Remove barrels (Toggleable);
 
 ## Better Exploration
 
