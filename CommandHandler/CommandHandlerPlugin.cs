@@ -1,7 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
+using Burst2Flame;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -13,11 +16,13 @@ namespace eradev.stolenrealm.CommandHandlerNS
         private const string CmdListDefault = "ls";
         private const string CmdClearDefault = "cls";
         private const string CmdSetCommandKeyDefault = "set_cmd_key";
+        private const string CmdFindSkillDefault = "find_skill";
 
         private static ConfigEntry<string> _cmdKey;
         private static ConfigEntry<string> _cmdList;
         private static ConfigEntry<string> _cmdClear;
         private static ConfigEntry<string> _cmdSetCommandKey;
+        private static ConfigEntry<string> _cmdFindSkill;
 
         [UsedImplicitly]
         private void Awake()
@@ -26,6 +31,7 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
             _cmdList = Config.Bind("Commands", "list", CmdListDefault, "List all available commands");
             _cmdClear = Config.Bind("Commands", "clear", CmdClearDefault, "Clear the chat window");
+            _cmdFindSkill = Config.Bind("Commands", "findskill", CmdFindSkillDefault, "[Args (string)] Find a skill GUID by name");
             _cmdSetCommandKey = Config.Bind("Commands", "setCommandKey", CmdSetCommandKeyDefault, "[Args (char, non-alphanumeric)] Set a new command key");
 
             CommandHandler.SetLogger(Logger);
@@ -35,6 +41,7 @@ namespace eradev.stolenrealm.CommandHandlerNS
             {
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdList);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdClear);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdFindSkill);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdSetCommandKey);
             };
 
@@ -62,15 +69,54 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
                         // Cyan = #00FFFF
                         sb.AppendLine(
-                            $"<b><color=orange>{CommandHandler.CommandKey}{availableCommand.Key}</color>{(capture.IsNullOrWhiteSpace() ? "" : $" <color=#00FFFF>{capture}</color>")}</b> : {input}");
+                            $"  <b><color=orange>{CommandHandler.CommandKey}{availableCommand.Key}</color>{(capture.IsNullOrWhiteSpace() ? "" : $" <color=#00FFFF>{capture}</color>")}</b> : {input}");
                         CommandHandler.LogInfo($"{CommandHandler.CommandKey}{availableCommand.Key}{(capture.IsNullOrWhiteSpace() ? "" : $" {capture}")} : {Regex.Replace(input, "<.*?>", string.Empty)}");
                     }
 
-                    CommandHandler.DisplayMessage(sb.ToString());
+                    CommandHandler.DisplayMessage(sb.ToString(), PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdClear.Value))
                 {
                     MessageWindowManager.instance.ClearAllMessages();
+                }
+                else if (command.Name.Equals(_cmdFindSkill.Value))
+                {
+                    if (command.Args.Count < 1 || string.IsNullOrWhiteSpace(string.Join(" ", command.Args)))
+                    {
+                        CommandHandler.DisplayError("You must specify a valid value");
+
+                        return;
+                    }
+
+                    var searchTerm = string.Join(" ", command.Args);
+                    var foundSkills = Game.Instance.Skills
+                        .Distinct()
+                        .Where(x =>
+                            x.SkillName.ToLowerInvariant().Contains(searchTerm.ToLowerInvariant()) ||
+                            OptionsManager.Localize(x.SkillName).ToLowerInvariant().Contains(searchTerm.ToLowerInvariant()))
+                        .ToList();
+
+                    if (!foundSkills.Any())
+                    {
+                        CommandHandler.DisplayError(
+                            $"Cannot find a skill with the name '{searchTerm}'. Try with the english name if possible.");
+
+                        return;
+                    }
+
+                    var sb = new StringBuilder();
+
+                    sb.AppendLine($"Found {foundSkills.Count} {(foundSkills.Count > 1 ? "entries" : "entry")} with '{searchTerm}':");
+
+                    foreach (var skill in foundSkills)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine($"  {OptionsManager.Localize(skill.SkillName)}");
+                        sb.AppendLine($"  (English: {skill.SkillName})");
+                        sb.AppendLine($"  {skill.Guid}");
+                    }
+
+                    CommandHandler.DisplayMessage(sb.ToString(), PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdSetCommandKey.Value))
                 {

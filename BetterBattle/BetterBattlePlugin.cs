@@ -11,7 +11,6 @@ using Burst2Flame.Observable;
 using eradev.stolenrealm.CommandHandlerNS;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +22,11 @@ namespace eradev.stolenrealm.BetterBattle
     {
         private const bool IsAutoCastAurasEnabledDefault = true;
         private const string CmdToggleAutoCastAurasDefault = "t_auras";
+
+        private const bool IsAutoCastSkillsEnabledDefault = true;
+        private const string CmdToggleAutoCastSkillsDefault = "t_autocastskills";
+        private const string CmdAddAutoCastSkillsDefault = "add_acs";
+        private const string CmdRemoveAutoCastSkillsDefault = "remove_acs";
 
         private const bool IsConvertExpGoldEnabledDefault = true;
         private const string CmdToggleConvertExpGoldDefault = "t_expgold";
@@ -36,6 +40,12 @@ namespace eradev.stolenrealm.BetterBattle
 
         private static ConfigEntry<string> _cmdToggleAutoCastAuras;
         private static ConfigEntry<bool> _isAutoCastAurasEnabled;
+
+        private static ConfigEntry<string> _cmdToggleAutoCastSkills;
+        private static ConfigEntry<string> _cmdAddAutoCastSkills;
+        private static ConfigEntry<string> _cmdRemoveAutoCastSkills;
+        private static ConfigEntry<bool> _isAutoCastSkillsEnabled;
+        private static ConfigEntry<string> _autoCastSkills;
 
         private static ConfigEntry<bool> _isDisplayLootInConsoleEnabled;
 
@@ -52,6 +62,7 @@ namespace eradev.stolenrealm.BetterBattle
         private static ManualLogSource _log;
 
         private static DestructibleSpawnInfo[] _defaultDestructibleSpawnInfos;
+        private static List<string> _autoCastListCache;
 
         [UsedImplicitly]
         private void Awake()
@@ -60,6 +71,10 @@ namespace eradev.stolenrealm.BetterBattle
 
             _isAutoCastAurasEnabled = Config.Bind("General", "autocastauras_enabled", IsAutoCastAurasEnabledDefault,
                 "Enable auto-cast auras at the start of battles");
+            _isAutoCastSkillsEnabled = Config.Bind("General", "autocastskills_enabled", IsAutoCastSkillsEnabledDefault,
+                "Enable auto-cast skills whenever available");
+            _autoCastSkills = Config.Bind("General", "autocastskills", string.Empty,
+                "List of skills to auto-cast (GUID)");
             _isConvertExpGoldEnabled = Config.Bind("General", "convertexpgold_enabled", IsConvertExpGoldEnabledDefault,
                 "Enable convert EXP to gold when your character reached max level");
             _isDisplayLootInConsoleEnabled = Config.Bind("General", "displaylootinconsole_enabled", IsDisplayLootInConsoleDisabledDefault,
@@ -71,6 +86,12 @@ namespace eradev.stolenrealm.BetterBattle
 
             _cmdToggleAutoCastAuras =
                 Config.Bind("Commands", "autocastauras_toggle", CmdToggleAutoCastAurasDefault, "Toggle auto-cast auras");
+            _cmdToggleAutoCastSkills =
+                Config.Bind("Commands", "autocastskills_toggle", CmdToggleAutoCastSkillsDefault, "Toggle auto-cast skills");
+            _cmdAddAutoCastSkills =
+                Config.Bind("Commands", "autocastskills_add", CmdAddAutoCastSkillsDefault, "[Args (string, name or GUID] Add skill to auto-cast list");
+            _cmdRemoveAutoCastSkills =
+                Config.Bind("Commands", "autocastskills_remove", CmdRemoveAutoCastSkillsDefault, "[Args (string, name or GUID)] Remove skill from auto-cast list");
             _cmdToggleConvertExpGold = Config.Bind("Commands", "convertexpgold_toggle", CmdToggleConvertExpGoldDefault,
                 "Toggle convert EXP to gold when your character reached max level");
             _cmdToggleRemoveBarrels = Config.Bind("Commands", "removebarrels_toggle", CmdToggleRemoveBarrelsDefault,
@@ -81,6 +102,9 @@ namespace eradev.stolenrealm.BetterBattle
             CommandHandler.RegisterCommandsEvt += (_, _) =>
             {
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleAutoCastAuras);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleAutoCastSkills);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdAddAutoCastSkills);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdRemoveAutoCastSkills);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleConvertExpGold);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleRemoveBarrels);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleRemoveDropsLimit);
@@ -94,6 +118,82 @@ namespace eradev.stolenrealm.BetterBattle
 
                     CommandHandler.DisplayMessage(
                         $"Successfully {(_isAutoCastAurasEnabled.Value ? "enabled" : "disabled")} auto-cast auras",
+                        PluginInfo.PLUGIN_NAME);
+                }
+                else if (command.Name.Equals(_cmdToggleAutoCastSkills.Value))
+                {
+                    _isAutoCastSkillsEnabled.Value = !_isAutoCastSkillsEnabled.Value;
+
+                    CommandHandler.DisplayMessage(
+                        $"Successfully {(_isAutoCastSkillsEnabled.Value ? "enabled" : "disabled")} auto-cast skills",
+                        PluginInfo.PLUGIN_NAME);
+                }
+                else if (command.Name.Equals(_cmdAddAutoCastSkills.Value) || command.Name.Equals(_cmdRemoveAutoCastSkills.Value))
+                {
+                    if (command.Args.Count < 1 || string.IsNullOrWhiteSpace(string.Join(" ", command.Args)))
+                    {
+                        CommandHandler.DisplayError("You must specify a valid value");
+
+                        return;
+                    }
+
+                    var searchParam = string.Join(" ", command.Args);
+                    var foundSkills = Game.Instance.Skills
+                        .Distinct()
+                        .Where(x =>
+                            x.Guid.ToString() == searchParam ||
+                            x.SkillName.ToLowerInvariant().Contains(searchParam.ToLowerInvariant()) ||
+                            OptionsManager.Localize(x.SkillName).ToLowerInvariant().Contains(searchParam.ToLowerInvariant()))
+                        .ToList();
+
+                    if (!foundSkills.Any())
+                    {
+                        CommandHandler.DisplayError("Skill not found");
+
+                        return;
+                    }
+
+                    if (foundSkills.Count > 1)
+                    {
+                        CommandHandler.DisplayError($"Multiple skills found for term '{searchParam}'. Please use a more precise search term, or use a GUID.");
+
+                        return;
+                    }
+
+                    var currentAutoCastSkills = _autoCastSkills.Value.Split(',').ToList();
+                    var skillGuid = foundSkills[0].Guid.ToString();
+
+                    if (command.Name.Equals(_cmdAddAutoCastSkills.Value))
+                    {
+                        if (currentAutoCastSkills.Contains(skillGuid))
+                        {
+                            CommandHandler.DisplayError("This skill already exist in the auto-cast list");
+
+                            return;
+                        }
+
+                        currentAutoCastSkills.Add(skillGuid);
+                    }
+                    else
+                    {
+                        if (!currentAutoCastSkills.Contains(skillGuid))
+                        {
+                            CommandHandler.DisplayError("This skill is not in the auto-cast list");
+
+                            return;
+                        }
+
+                        currentAutoCastSkills.Remove(skillGuid);
+                    }
+
+                    _autoCastSkills.Value = string.Join(",", currentAutoCastSkills);
+
+                    _autoCastListCache = currentAutoCastSkills;
+
+                    CommandHandler.DisplayMessage(
+                        command.Name.Equals(_cmdAddAutoCastSkills.Value)
+                            ? $"Successfully added skill {OptionsManager.Localize(foundSkills[0].SkillName)} to the auto-cast list"
+                            : $"Successfully removed skill {OptionsManager.Localize(foundSkills[0].SkillName)} from the auto-cast list",
                         PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdToggleConvertExpGold.Value))
@@ -180,9 +280,9 @@ namespace eradev.stolenrealm.BetterBattle
         }
         #endregion
 
-        #region Auto-cast auras
+        #region Auto-cast auras/skills
         [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
-        public class GameLogicStartNewTurnSequencePatch
+        public class GameLogicStartNewTurnSequenceAurasPatch
         {
             [UsedImplicitly]
             private static void Postfix(GameLogic __instance)
@@ -216,16 +316,54 @@ namespace eradev.stolenrealm.BetterBattle
                     }
                 }
             }
+        }
 
-            private static IEnumerator QueueCast(Character character, ActionInfo actionInfo)
+        [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
+        public class GameLogicStartNewTurnSequenceSkillsPatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(GameLogic __instance)
             {
-                while (character.Acting)
+                if (!_isAutoCastSkillsEnabled.Value || __instance.currentTeamTurnIndex != 1)
                 {
-                    yield return new WaitForEndOfFrame();
+                    return;
                 }
 
-                character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
+                _autoCastListCache ??= _autoCastSkills.Value.Split(',').ToList();
+
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                {
+                    var skillsToCast = character.Actions
+                        .Where(x => _autoCastListCache.Contains(x.SkillInfo.Guid.ToString()))
+                        .Select(x => x.ActionInfo)
+                        .ToList();
+
+                    foreach (var actionInfo in skillsToCast)
+                    {
+                        var canCastInfo = character.PlayerMovement.CanCast(new StructList<HexCell>
+                        {
+                            null
+                        }, actionInfo);
+
+                        if (!canCastInfo.CanCast)
+                        {
+                            continue;
+                        }
+
+                        __instance.StartCoroutine(QueueCast(character, actionInfo));
+                    }
+                }
             }
+        }
+
+        private static IEnumerator QueueCast(Character character, ActionInfo actionInfo)
+        {
+            while (character.Acting)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+
+            character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
         }
         #endregion
 

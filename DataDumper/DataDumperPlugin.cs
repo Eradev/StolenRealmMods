@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using Burst2Flame;
@@ -16,6 +17,7 @@ namespace DataDumper
         private static ConfigEntry<string> _gamblingRolls;
         private static ConfigEntry<string> _itemMods;
         private static ConfigEntry<string> _fortunes;
+        private static ConfigEntry<string> _skills;
 
         private void Awake()
         {
@@ -24,6 +26,7 @@ namespace DataDumper
             _gamblingRolls = Config.Bind("General", "Gambling rolls", string.Empty);
             _itemMods = Config.Bind("General", "Item mods", string.Empty);
             _fortunes = Config.Bind("General", "Fortunes", string.Empty);
+            _skills = Config.Bind("General", "Skills", string.Empty);
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -61,6 +64,13 @@ namespace DataDumper
                         fortune => fortune.Guid);
 
                 _fortunes.Value = JsonConvert.SerializeObject(fortunes);
+
+                var skills = Game.Instance.Skills
+                    .Distinct()
+                    .Select(skill => new Tuple<string, string>(skill.SkillName, skill.Guid.ToString()))
+                    .ToList();
+
+                _skills.Value = JsonConvert.SerializeObject(skills);
             }
         }
     }

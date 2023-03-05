@@ -35,14 +35,20 @@ namespace eradev.stolenrealm.CommandHandlerNS
         {
             if (commandKey.Value.Length > 1)
             {
-                LogWarning($"The command key must be a char. Defaulting to '{CommandKeyDefault}'");
+                var lengthError = $"The command key must be a char. Defaulting to '{CommandKeyDefault}'";
+
+                LogWarning(lengthError);
+                DisplayError(lengthError);
 
                 commandKey.Value = CommandKeyDefault.ToString();
 
             }
             else if (char.IsLetterOrDigit(commandKey.Value[0]) || char.IsWhiteSpace(commandKey.Value[0]))
             {
-                LogWarning($"The command key cannot be alphanumeric or a space char. Defaulting to '{CommandKeyDefault}'");
+                var alphanumericError = $"The command key cannot be alphanumeric or a space char. Defaulting to '{CommandKeyDefault}'";
+
+                LogWarning(alphanumericError);
+                DisplayError(alphanumericError);
 
                 commandKey.Value = CommandKeyDefault.ToString();
             }
@@ -50,7 +56,9 @@ namespace eradev.stolenrealm.CommandHandlerNS
             CommandKey = commandKey.Value[0];
 
             var message = $"Command key set to '{CommandKey}'";
+
             LogInfo(message);
+            DisplayMessage(message, PluginInfo.PLUGIN_NAME);
         }
 
         public static void TryAddCommand(string modName, ref ConfigEntry<string> command)
@@ -113,6 +121,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
         public static void BroadcastMessage(string message, string source = null)
         {
+            if (MessageWindowManager.instance == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrWhiteSpace(source))
             {
                 message = $"<color=orange>{source}:</color> {message}";
@@ -123,6 +136,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
         public static void DisplayMessage(string message, string source = null)
         {
+            if (MessageWindowManager.instance == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrWhiteSpace(source))
             {
                 message = $"<color=orange>{source}:</color> {message}";
@@ -133,6 +151,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
         public static void DisplayError(string message)
         {
+            if (MessageWindowManager.instance == null)
+            {
+                return;
+            }
+
             message = $"<color=red>Error:</color> {message}";
 
             MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
@@ -140,6 +163,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
 
         public static void DisplayNotification(string message, string title = null)
         {
+            if (NotificationManager.instance == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrWhiteSpace(title))
             {
                 message = $"<big>{title}</big>\n{message}";
