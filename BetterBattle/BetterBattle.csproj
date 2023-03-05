@@ -8,8 +8,9 @@
 * Right clicking on a self target skill will cast it automatically
 * Auras are activated automatically at the start of the battle (Toggleable)
 * Convert EXP gained into gold when your character reached max level (Toggleable)
-* Remove the item drops limit (Toggleable)</Description>
-    <Version>1.1.1</Version>
+* Remove the item drops limit (Toggleable)
+* Remove barrels (Toggleable)</Description>
+    <Version>1.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterBattle</RootNamespace>
@@ -21,6 +22,7 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.23" IncludeAssets="compile" />
   </ItemGroup>
   
