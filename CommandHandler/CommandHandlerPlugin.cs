@@ -120,16 +120,12 @@ namespace eradev.stolenrealm.CommandHandlerNS
                 }
                 else if (command.Name.Equals(_cmdSetCommandKey.Value))
                 {
-                    CommandHandler.LogDebug("???");
-
                     if (command.Args.Count < 1 || !char.TryParse(command.Args[0], out var newKey) || char.IsLetterOrDigit(newKey) || char.IsWhiteSpace(newKey))
                     {
                         CommandHandler.DisplayError("You must specify a valid value");
 
                         return;
                     }
-
-                    CommandHandler.LogDebug($"Trying to set new key '{newKey}'");
 
                     _cmdKey.Value = newKey.ToString();
 
