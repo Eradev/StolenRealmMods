@@ -194,27 +194,20 @@ namespace eradev.stolenrealm.BetterBattle
 
                 foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
                 {
-                    foreach (var actionInfo in character.Actions.Select(x => x.ActionInfo).ToList())
+                    var auras = character.Actions
+                        .Select(x => x.ActionInfo)
+                        .Where(x => x.StatusEffects.Any(y => y.IsAura))
+                        .ToList();
+
+                    foreach (var actionInfo in auras)
                     {
                         var canCastInfo = character.PlayerMovement.CanCast(new StructList<HexCell>
                         {
                             null
                         }, actionInfo);
 
-                        var statusEffect = actionInfo.StatusEffects.FirstOrDefault();
-
-                        var target = (TargetInfo)actionInfo.Targets[0];
-                        var rangeText = !string.IsNullOrEmpty(actionInfo.TargetTextOverride)
-                            ? OptionsManager.Localize(actionInfo.TargetTextOverride)
-                            : target.UseSimpleTargetingRange
-                                ? actionInfo.GetSimpleRange(character, target).ToString()
-                                : "Special";
-
                         if (!canCastInfo.CanCast ||
-                            !canCastInfo.NotYetActivated ||
-                            statusEffect == null ||
-                            !statusEffect.Infinite ||
-                            rangeText != "0")
+                            !canCastInfo.NotYetActivated)
                         {
                             continue;
                         }
@@ -230,9 +223,6 @@ namespace eradev.stolenrealm.BetterBattle
                 {
                     yield return new WaitForEndOfFrame();
                 }
-
-                _log.LogDebug($"Trying to cast {OptionsManager.Localize(actionInfo.ActionName)}");
-                _log.LogDebug(JsonConvert.SerializeObject(actionInfo));
 
                 character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
             }
