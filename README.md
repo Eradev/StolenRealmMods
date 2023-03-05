@@ -13,6 +13,14 @@ Changes to make the battles better:
 * Convert EXP gained into gold when your character reached max level (Toggleable);
 * Remove the item drops limit (Toggleable).
 
+## Better Exploration
+
+Changes to make the explorations better:
+
+* Treasures always give an Epic or Legendary reward (Toggleable);
+* Auto-complete the exploration mini-games (Gathering, farming and mining) (Toggleable);
+* Customizable movement speed (Toggleable).
+
 ## Better Message Window
 
 Changes to make the message window better:
@@ -37,14 +45,6 @@ Note: Duration only appear for the host.
 ## Command Handler
 
 Handles chat commands from other mods.
-
-## Easy Gathering
-
-Easy gathering, fishing, and mining.
-
-## Faster Movement Speed
-
-Configurable movement speed multiplier.
 
 ## Free Respec
 
