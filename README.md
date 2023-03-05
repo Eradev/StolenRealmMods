@@ -19,7 +19,8 @@ Changes to make the explorations better:
 
 * Treasures always give an Epic or Legendary reward (Toggleable);
 * Auto-complete the exploration mini-games (Gathering, farming and mining) (Toggleable);
-* Customizable movement speed (Toggleable).
+* Customizable movement speed (Toggleable);
+* Get the Fortune on all your party members when one gets it. (Toggleable)
 
 ## Better Message Window
 

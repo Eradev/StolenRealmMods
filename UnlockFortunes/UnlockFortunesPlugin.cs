@@ -14,10 +14,8 @@ namespace eradev.stolenrealm.UnlockFortunes
     public class UnlockFortunesPlugin : BaseUnityPlugin
     {
         private const bool IsUnlockAllFortunesMaxedEnabledDefault = false;
-        private const bool IsUnlockFortuneAllPartyEnabledDefault = true;
 
         private static ConfigEntry<bool> _isUnlockAllFortunesMaxedEnabled;
-        private static ConfigEntry<bool> _isUnlockFortuneAllPartyEnabled;
 
         private static ManualLogSource _log;
 
@@ -27,8 +25,6 @@ namespace eradev.stolenrealm.UnlockFortunes
 
             _isUnlockAllFortunesMaxedEnabled = Config.Bind("General", "unlockallfortunesmaxed_enabled", IsUnlockAllFortunesMaxedEnabledDefault,
                 "Enable always unlock all fortunes at maxed level (On game load, and on character creation)");
-            _isUnlockFortuneAllPartyEnabled = Config.Bind("General", "unlockfortuneallparty_enabled", IsUnlockFortuneAllPartyEnabledDefault,
-                "Enable unlock fortune on all your party when you unlock on one");
 
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
 
@@ -49,54 +45,6 @@ namespace eradev.stolenrealm.UnlockFortunes
                 foreach (var character in __result)
                 {
                     UnlockFortunes(character);
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Character), "AddFortune")]
-        public class CharacterAddFortunePatch
-        {
-            [UsedImplicitly]
-            private static void Postfix(string guid, float level)
-            {
-                if (!_isUnlockFortuneAllPartyEnabled.Value)
-                {
-                    return;
-                }
-
-                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
-                {
-                    var hasChanges = false;
-
-                    var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == guid);
-
-                    if (characterFortune == null)
-                    {
-                        character.FortuneData.Add(new FortuneSaveData
-                        {
-                            Guid = guid,
-                            Level = level,
-                            EquippedSlotIndex = -1,
-                            IsNew = true
-                        });
-
-                        hasChanges = true;
-                    }
-                    else if (characterFortune.Level < level)
-                    {
-                        characterFortune.Level = level;
-
-                        hasChanges = true;
-                    }
-
-                    if (hasChanges)
-                    {
-                        character.FortuneData = character.FortuneData
-                            .OrderBy(x => x.GetLocalizedName())
-                            .ToList();
-
-                        character.Save(true);
-                    }
                 }
             }
         }

@@ -25,6 +25,9 @@ namespace eradev.stolenrealm.BetterExploration
         private const bool IsMiniGamesAutoCompletionEnabledDefault = true;
         private const string CmdToggleMiniGamesAutoCompletionDefault = "t_gathering";
 
+        private const bool IsUnlockFortunePartyEnabledDefault = true;
+        private const string CmdToggleUnlockFortunePartyDefault = "t_fortune4party";
+
         private static ConfigEntry<string> _cmdToggleBetterTreasures;
         private static ConfigEntry<bool> _isBetterTreasuresEnabled;
 
@@ -35,6 +38,9 @@ namespace eradev.stolenrealm.BetterExploration
 
         private static ConfigEntry<string> _cmdToggleMiniGamesAutoCompletion;
         private static ConfigEntry<bool> _isMiniGamesAutoCompletionEnabled;
+
+        private static ConfigEntry<string> _cmdToggleUnlockFortuneParty;
+        private static ConfigEntry<bool> _isUnlockFortunePartyEnabled;
 
         // ReSharper disable once NotAccessedField.Local
         private static ManualLogSource _log;
@@ -52,11 +58,14 @@ namespace eradev.stolenrealm.BetterExploration
                 _speedMultiplier.Value = 1.0f;
             }
             _isMiniGamesAutoCompletionEnabled = Config.Bind("General", "minigamesautocompletion_enabled", IsMiniGamesAutoCompletionEnabledDefault, "Enable mini-games auto-completion");
+            _isUnlockFortunePartyEnabled = Config.Bind("General", "unlockfortuneparty_enabled", IsUnlockFortunePartyEnabledDefault,
+                "Enable unlock fortune for your party");
 
             _cmdToggleBetterTreasures = Config.Bind("Commands", "bettertreasures_toggle", CmdToggleBetterTreasuresDefault, "Toggle better treasures");
             _cmdSetCustomizedMovementSpeed = Config.Bind("Commands", "customizedmovementspeed_set", CmdSetCustomizedMovementSpeedDefault, "[Args (float, min 1.0)] Set the movement speed multiplier");
             _cmdToggleCustomizedMovementSpeed = Config.Bind("Commands", "customizedmovementspeed_toggle", CmdToggleCustomizedMovementSpeedDefault, "Toggle customized movement speed");
             _cmdToggleMiniGamesAutoCompletion = Config.Bind("Commands", "minigamesautocompletion_toggle", CmdToggleMiniGamesAutoCompletionDefault, "Toggle mini-games auto-completion");
+            _cmdToggleUnlockFortuneParty = Config.Bind("Commands", "unlockfortuneparty_toggle", CmdToggleUnlockFortunePartyDefault, "Toggle unlock fortune for your party");
 
             CommandHandler.RegisterCommandsEvt += (_, _) =>
             {
@@ -64,6 +73,7 @@ namespace eradev.stolenrealm.BetterExploration
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdSetCustomizedMovementSpeed);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleCustomizedMovementSpeed);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleMiniGamesAutoCompletion);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleUnlockFortuneParty);
             };
 
             CommandHandler.HandleCommandEvt += (_, command) =>
@@ -73,7 +83,7 @@ namespace eradev.stolenrealm.BetterExploration
                     _isBetterTreasuresEnabled.Value = !_isBetterTreasuresEnabled.Value;
 
                     CommandHandler.DisplayMessage(
-                        $"Successfully {(_isCustomizedMovementSpeedEnabled.Value ? "enabled" : "disabled")} better treasures",
+                        $"Successfully {(_isBetterTreasuresEnabled.Value ? "enabled" : "disabled")} better treasures",
                         PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdToggleCustomizedMovementSpeed.Value))
@@ -103,6 +113,14 @@ namespace eradev.stolenrealm.BetterExploration
 
                     CommandHandler.DisplayMessage(
                         $"Successfully {(_isMiniGamesAutoCompletionEnabled.Value ? "enabled" : "disabled")} mini-games auto-completion",
+                        PluginInfo.PLUGIN_NAME);
+                }
+                else if (command.Name.Equals(_cmdToggleUnlockFortuneParty.Value))
+                {
+                    _isUnlockFortunePartyEnabled.Value = !_isUnlockFortunePartyEnabled.Value;
+
+                    CommandHandler.DisplayMessage(
+                        $"Successfully {(_isUnlockFortunePartyEnabled.Value ? "enabled" : "disabled")} unlock fortune for party",
                         PluginInfo.PLUGIN_NAME);
                 }
             };
@@ -267,6 +285,58 @@ namespace eradev.stolenrealm.BetterExploration
                 ___professionPlayer.AnimManager.SetTrigger("MiningSuccess");
 
                 return false;
+            }
+        }
+        #endregion
+
+        #region Unlock fortune for party
+        [HarmonyPatch(typeof(Character), "AddFortune")]
+        public class CharacterAddFortunePatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(string guid, float level)
+            {
+                if (!_isUnlockFortunePartyEnabled.Value)
+                {
+                    return;
+                }
+
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                {
+                    var hasChanges = false;
+
+                    var characterFortune = character.FortuneData.SingleOrDefault(x => x.Guid == guid);
+
+                    if (characterFortune == null)
+                    {
+                        character.FortuneData.Add(new FortuneSaveData
+                        {
+                            Guid = guid,
+                            Level = level,
+                            EquippedSlotIndex = -1,
+                            IsNew = true
+                        });
+
+                        hasChanges = true;
+                    }
+                    else if (characterFortune.Level < level)
+                    {
+                        characterFortune.Level = level;
+
+                        hasChanges = true;
+                    }
+
+                    if (!hasChanges)
+                    {
+                        continue;
+                    }
+
+                    /*character.FortuneData = character.FortuneData
+                        .OrderBy(x => x.GetLocalizedName())
+                        .ToList();*/
+
+                    character.Save(true);
+                }
             }
         }
         #endregion
