@@ -120,6 +120,8 @@ namespace eradev.stolenrealm.CommandHandlerNS
                 }
                 else if (command.Name.Equals(_cmdSetCommandKey.Value))
                 {
+                    CommandHandler.LogDebug("???");
+
                     if (command.Args.Count < 1 || !char.TryParse(command.Args[0], out var newKey) || char.IsLetterOrDigit(newKey) || char.IsWhiteSpace(newKey))
                     {
                         CommandHandler.DisplayError("You must specify a valid value");
@@ -127,9 +129,11 @@ namespace eradev.stolenrealm.CommandHandlerNS
                         return;
                     }
 
-                    _cmdSetCommandKey.Value = newKey.ToString();
+                    CommandHandler.LogDebug($"Trying to set new key '{newKey}'");
 
-                    CommandHandler.TrySetCommandKey(ref _cmdSetCommandKey);
+                    _cmdKey.Value = newKey.ToString();
+
+                    CommandHandler.TrySetCommandKey(ref _cmdKey);
                 }
             };
 
