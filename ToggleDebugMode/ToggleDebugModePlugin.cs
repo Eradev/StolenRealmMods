@@ -78,6 +78,8 @@ namespace eradev.stolenrealm.ToggleDebugMode
                     }
 
                     DebugWindow.instance.ShowDebugWindow();
+
+                    CommandHandler.BroadcastMessage("The host opened the debug menu.", PluginInfo.PLUGIN_NAME);
                 }
                 else if (command.Name.Equals(_cmdToggle.Value))
                 {
@@ -97,6 +99,8 @@ namespace eradev.stolenrealm.ToggleDebugMode
                         EnableDebugMode();
 
                         DebugWindow.instance.ShowDebugWindow();
+
+                        CommandHandler.BroadcastMessage("The host opened the debug menu.", PluginInfo.PLUGIN_NAME);
                     }
                 }
             };
@@ -111,8 +115,6 @@ namespace eradev.stolenrealm.ToggleDebugMode
             AccessTools.FieldRefAccess<bool>(typeof(DebugWindow), "debugActivated").Invoke(DebugWindow.instance) = true;
 
             PlayerPrefs.SetString("DebugModeEnabled", "TRUE");
-
-            CommandHandler.BroadcastMessage("The host enabled the debug mode.", PluginInfo.PLUGIN_NAME);
         }
 
         private static void DisableDebugMode()
