@@ -112,7 +112,7 @@ namespace eradev.stolenrealm.ToggleDebugMode
 
             PlayerPrefs.SetString("DebugModeEnabled", "TRUE");
 
-            CommandHandler.BroadcastMessage($"</color=orange>{PluginInfo.PLUGIN_NAME}:</color> The host enabled the debug mode.");
+            CommandHandler.BroadcastMessage("The host enabled the debug mode.", PluginInfo.PLUGIN_NAME);
         }
 
         private static void DisableDebugMode()
@@ -150,7 +150,7 @@ namespace eradev.stolenrealm.ToggleDebugMode
             DebugWindow.instance.HideCharacterHoverInfoToggle.isOn = false;
             DebugWindow.instance.HideBasicUIToggle.isOn = false;
 
-            CommandHandler.BroadcastMessage("The host disabled the debug mode.");
+            CommandHandler.BroadcastMessage("The host disabled the debug mode.", PluginInfo.PLUGIN_NAME);
         }
     }
 }

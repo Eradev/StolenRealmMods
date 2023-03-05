@@ -138,8 +138,13 @@ namespace eradev.stolenrealm.CommandHandlerNS
             MessageWindowManager.instance.AddMessage(message, MessageWindowMessageType.Chat);
         }
 
-        public static void DisplayNotification(string message)
+        public static void DisplayNotification(string message, string title = null)
         {
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                message = $"<big>{title}</big>\n{message}";
+            }
+
             NotificationManager.instance.DisplayNotification(message);
         }
 

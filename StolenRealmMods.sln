@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnlockFortunes", "UnlockFor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterBattle", "BetterBattle\BetterBattle.csproj", "{AEE5344C-33AF-4B25-9B2D-E52179581480}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheatDetector", "CheatDetector\CheatDetector.csproj", "{C74BD3C9-5245-4694-97F0-625D5B40BFA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{AEE5344C-33AF-4B25-9B2D-E52179581480}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEE5344C-33AF-4B25-9B2D-E52179581480}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEE5344C-33AF-4B25-9B2D-E52179581480}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C74BD3C9-5245-4694-97F0-625D5B40BFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C74BD3C9-5245-4694-97F0-625D5B40BFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C74BD3C9-5245-4694-97F0-625D5B40BFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C74BD3C9-5245-4694-97F0-625D5B40BFA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
