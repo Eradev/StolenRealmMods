@@ -27,6 +27,7 @@ namespace eradev.stolenrealm.BetterBattle
         private const string CmdToggleAutoCastSkillsDefault = "t_autocastskills";
         private const string CmdAddAutoCastSkillsDefault = "add_acs";
         private const string CmdRemoveAutoCastSkillsDefault = "remove_acs";
+        private const string CmdClearAutoCastSkillsDefault = "clear_acs";
 
         private const bool IsConvertExpGoldEnabledDefault = true;
         private const string CmdToggleConvertExpGoldDefault = "t_expgold";
@@ -44,6 +45,7 @@ namespace eradev.stolenrealm.BetterBattle
         private static ConfigEntry<string> _cmdToggleAutoCastSkills;
         private static ConfigEntry<string> _cmdAddAutoCastSkills;
         private static ConfigEntry<string> _cmdRemoveAutoCastSkills;
+        private static ConfigEntry<string> _cmdClearAutoCastSkills;
         private static ConfigEntry<bool> _isAutoCastSkillsEnabled;
         private static ConfigEntry<string> _autoCastSkills;
 
@@ -63,6 +65,8 @@ namespace eradev.stolenrealm.BetterBattle
 
         private static DestructibleSpawnInfo[] _defaultDestructibleSpawnInfos;
         private static List<string> _autoCastListCache;
+        private static bool _autoCastAuraRanOnce;
+        private static bool _autoCastSkillsRanOnce;
 
         [UsedImplicitly]
         private void Awake()
@@ -92,6 +96,8 @@ namespace eradev.stolenrealm.BetterBattle
                 Config.Bind("Commands", "autocastskills_add", CmdAddAutoCastSkillsDefault, "[Args (string, name or GUID] Add skill to auto-cast list");
             _cmdRemoveAutoCastSkills =
                 Config.Bind("Commands", "autocastskills_remove", CmdRemoveAutoCastSkillsDefault, "[Args (string, name or GUID)] Remove skill from auto-cast list");
+            _cmdClearAutoCastSkills =
+                Config.Bind("Commands", "autocastskills_clear", CmdClearAutoCastSkillsDefault, "Remove all skills from auto-cast list");
             _cmdToggleConvertExpGold = Config.Bind("Commands", "convertexpgold_toggle", CmdToggleConvertExpGoldDefault,
                 "Toggle convert EXP to gold when your character reached max level");
             _cmdToggleRemoveBarrels = Config.Bind("Commands", "removebarrels_toggle", CmdToggleRemoveBarrelsDefault,
@@ -105,6 +111,7 @@ namespace eradev.stolenrealm.BetterBattle
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleAutoCastSkills);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdAddAutoCastSkills);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdRemoveAutoCastSkills);
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdClearAutoCastSkills);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleConvertExpGold);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleRemoveBarrels);
                 CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleRemoveDropsLimit);
@@ -196,6 +203,14 @@ namespace eradev.stolenrealm.BetterBattle
                             : $"Successfully removed skill {OptionsManager.Localize(foundSkills[0].SkillName)} from the auto-cast list",
                         PluginInfo.PLUGIN_NAME);
                 }
+                else if (command.Name.Equals(_cmdClearAutoCastSkills.Value))
+                {
+                    _autoCastSkills.Value = string.Empty;
+
+                    _autoCastListCache = new List<string>();
+
+                    CommandHandler.DisplayMessage("Successfully cleared the auto-cast list", PluginInfo.PLUGIN_NAME);
+                }
                 else if (command.Name.Equals(_cmdToggleConvertExpGold.Value))
                 {
                     _isConvertExpGoldEnabled.Value = !_isConvertExpGoldEnabled.Value;
@@ -280,19 +295,126 @@ namespace eradev.stolenrealm.BetterBattle
         }
         #endregion
 
-        #region Auto-cast auras/skills
-        [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
-        public class GameLogicStartNewTurnSequenceAurasPatch
+        #region Target portraits
+        [HarmonyPatch(typeof(Portrait), "SelectCharacter")]
+        public class PortraitSelectCharacterPatch
         {
             [UsedImplicitly]
-            private static void Postfix(GameLogic __instance)
+            private static bool Prefix(Portrait __instance)
             {
-                if (!_isAutoCastAurasEnabled.Value || __instance.currentTeamTurnIndex != 0 || __instance.numPlayerTurnsStarted != 0)
+                var hexCellManager = HexCellManager.instance;
+
+                if (!IsCurrentActionValidHoverPortrait())
+                {
+                    return true;
+                }
+
+                GameLogic.instance.StartCoroutine(QueueCast(GameLogic.instance.CurrentlySelectedCharacter, __instance.Character, hexCellManager.MyPlayer.CurrentAction));
+
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(Tooltip), "ShowTooltip")]
+        public class TooltipShowTooltipPatch
+        {
+            [UsedImplicitly]
+            private static void Prefix(Tooltip __instance)
+            {
+                // Resets the Image component that's disabled in ShowSelectedActionTooltip
+                __instance.GetComponent<Image>().enabled = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Portrait), "Update")]
+        public class PortraitUpdatePatch
+        {
+            [UsedImplicitly]
+            private static void Postfix()
+            {
+                if (!IsCurrentActionValidHoverPortrait() ||
+                    GUIManager.instance.tooltip.gameObject.activeInHierarchy)
                 {
                     return;
                 }
 
-                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                CursorManager.instance.SetCursor(CursorType.Target);
+                GUIManager.instance.tooltip.HideTooltip();
+
+                ShowSelectedActionTooltip(HexCellManager.instance.MyPlayer.CurrentAction);
+            }
+        }
+
+        [HarmonyPatch(typeof(Portrait), "OnExitHover")]
+        public class PortraitOnExitHoverPatch
+        {
+            [UsedImplicitly]
+            private static void Postfix()
+            {
+                GUIManager.instance.tooltip.HideTooltip();
+            }
+        }
+
+        private static bool IsCharacterCellValidCellForAction(Character character)
+        {
+            var selectedCharacter = GameLogic.instance.CurrentlySelectedCharacter;
+
+            var canCast = selectedCharacter.PlayerMovement.CanCast(new StructList<HexCell> { character.Cell }, selectedCharacter.PlayerMovement.CurrentAction).CanCast;
+            var hasLoS = !character.Cell.GetLineOfSightHitPoint(selectedCharacter.Cell).HasValue;
+
+            return canCast && hasLoS;
+        }
+
+        private static void ShowSelectedActionTooltip(ActionInfo actionInfo)
+        {
+            var tooltip = GUIManager.instance.tooltip;
+            var skill = Game.Instance.GetSkillFromActionInfo(actionInfo);
+
+            tooltip.ShowTooltip(OptionsManager.Localize(skill.SkillName), "", skill.Icon, "", null, Color.white, alpha: 0.7f);
+            tooltip.GetComponent<Image>().enabled = false;
+            tooltip.TitleSep.SetActive(false);
+
+            AccessTools.FieldRefAccess<bool>(typeof(Tooltip), "hideOnNotHoveringGO").Invoke(tooltip) = true;
+        }
+
+        private static bool IsCurrentActionValidHoverPortrait()
+        {
+            var hexCellManager = HexCellManager.instance;
+            var character = PortraitManager.Instance.HoverPortraitCharacter;
+
+            if (character == null ||
+                GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                hexCellManager.CurrentState != PlayerState.Action ||
+                hexCellManager.MyPlayer.CurrentAction == null ||
+                !IsCharacterCellValidCellForAction(character))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region Auto-cast auras/skills
+
+        [HarmonyPatch(typeof(GameLogic), "Update")]
+        public class GameLogicUpdateAurasPatch
+        {
+            [UsedImplicitly]
+            private static void Postfix(GameLogic __instance)
+            {
+                if (!_isAutoCastAurasEnabled.Value ||
+                    GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                    !NetworkingManager.Instance.NetworkManager.Root.IsPlayerTurnAndReady ||
+                    __instance.numPlayerTurnsStarted > 1 ||
+                    _autoCastAuraRanOnce)
+                {
+                    return;
+                }
+
+                _log.LogDebug("Auto-cast auras");
+
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters.Where(x => x.IsMyTurn && !x.IsDead))
                 {
                     var auras = character.Actions
                         .Select(x => x.ActionInfo)
@@ -312,26 +434,33 @@ namespace eradev.stolenrealm.BetterBattle
                             continue;
                         }
 
-                        __instance.StartCoroutine(QueueCast(character, actionInfo));
+                        __instance.StartCoroutine(QueueCast(character, character, actionInfo));
                     }
                 }
+
+                _autoCastAuraRanOnce = true;
             }
         }
 
-        [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
-        public class GameLogicStartNewTurnSequenceSkillsPatch
+        [HarmonyPatch(typeof(GameLogic), "Update")]
+        public class GameLogicUpdateSkillsPatch
         {
             [UsedImplicitly]
             private static void Postfix(GameLogic __instance)
             {
-                if (!_isAutoCastSkillsEnabled.Value || __instance.currentTeamTurnIndex != 1)
+                if (!_isAutoCastSkillsEnabled.Value ||
+                    GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                    !NetworkingManager.Instance.NetworkManager.Root.IsPlayerTurnAndReady ||
+                    _autoCastSkillsRanOnce)
                 {
                     return;
                 }
 
+                _log.LogDebug("Auto-cast skills");
+
                 _autoCastListCache ??= _autoCastSkills.Value.Split(',').ToList();
 
-                foreach (var character in NetworkingManager.Instance.MyPartyCharacters)
+                foreach (var character in NetworkingManager.Instance.MyPartyCharacters.Where(x => x.IsMyTurn && !x.IsDead))
                 {
                     var skillsToCast = character.Actions
                         .Where(x => _autoCastListCache.Contains(x.SkillInfo.Guid.ToString()))
@@ -350,20 +479,35 @@ namespace eradev.stolenrealm.BetterBattle
                             continue;
                         }
 
-                        __instance.StartCoroutine(QueueCast(character, actionInfo));
+                        __instance.StartCoroutine(QueueCast(character, character, actionInfo));
                     }
                 }
+
+                _autoCastSkillsRanOnce = true;
             }
         }
 
-        private static IEnumerator QueueCast(Character character, ActionInfo actionInfo)
+        [HarmonyPatch(typeof(GameLogic), "StartNewTurnSequence")]
+        public class GameLogicStartNewTurnSequencePatch
         {
-            while (character.Acting)
+            [UsedImplicitly]
+            private static void Postfix()
+            {
+                _autoCastAuraRanOnce = false;
+                _autoCastSkillsRanOnce = false;
+            }
+        }
+
+        private static IEnumerator QueueCast(Character source, Character target, ActionInfo actionInfo)
+        {
+            while (source.Acting)
             {
                 yield return new WaitForEndOfFrame();
             }
 
-            character.PlayerMovement.ExecuteAction(character.Cell, actionInfo);
+            source.PlayerMovement.ExecuteAction(target.Cell, actionInfo);
+
+            GUIManager.instance.tooltip.HideTooltip();
         }
         #endregion
 
