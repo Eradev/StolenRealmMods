@@ -9,17 +9,18 @@ Released mods are available to download at [ModWorkshop](https://modworkshop.net
 Changes to make the battles better:
 
 * Right clicking on a self target skill will cast it automatically;
+* Can target portraits when a skill is selected. A tooltip will show you which skill will be cast if it's a valid target;
 * Auto-cast auras at the start of the battle (Toggleable);
-* Auto-cast skills whenever available (Toggleable);
+* Auto-cast skills whenever available (Cast on self) (Toggleable);
 * Convert EXP gained into gold when your character reached max level (Toggleable);
-* Remove the item drops limit (Toggleable);
-* Remove barrels (Toggleable);
+* [HOST] Remove the item drops limit (Toggleable);
+* [HOST] Remove barrels (Toggleable);
 
 ## Better Exploration
 
 Changes to make the explorations better:
 
-* Treasures always give an Epic or Legendary reward (Toggleable);
+* [HOST] Treasures always give an Epic or Legendary reward (Toggleable);
 * Auto-complete the exploration mini-games (Gathering, farming and mining) (Toggleable);
 * Customizable movement speed (Toggleable);
 * Get the Fortune on all your party members when one gets it. (Toggleable)
@@ -37,7 +38,7 @@ Changes to make the message window better:
 
 Better tooltips:
 
-* Displays remaining duration on ground effects;
+* [HOST] Displays remaining duration on ground effects;
 * Displays stacks and remaining duration on buffs/debuffs;
 * Displays info when the buff/debuff cannot be dispelled;
 * Displays who has the same Fortune and their current level;

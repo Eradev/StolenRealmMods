@@ -6,9 +6,9 @@
     <Description>Changes to make battles better.
 
 * Right clicking on a self target skill will cast it automatically
-* Target portraits when a skill is selected. A tooltip will show you which skill will be cast if it's a valid target.
+* Can target portraits when a skill is selected
 * Auto-cast auras at the start of the battle (Toggleable)
-* Auto-cast skills whenever available (Toggleable)
+* Auto-cast skills whenever available (Cast on self) (Toggleable)
 * Convert EXP gained into gold when your character reached max level (Toggleable)
 * Remove the item drops limit (Toggleable)
 * Remove barrels (Toggleable)</Description>
