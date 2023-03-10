@@ -2,7 +2,7 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace eradev.stolenrealm.BetterBattle
+namespace eradev.stolenrealm.BetterBattle.Shared
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public class ClickAction: MonoBehaviour, IPointerClickHandler

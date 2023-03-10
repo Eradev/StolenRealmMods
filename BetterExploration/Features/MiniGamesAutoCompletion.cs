@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using BepInEx.Configuration;
+using eradev.stolenrealm.CommandHandlerNS;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -7,6 +9,36 @@ namespace eradev.stolenrealm.BetterExploration.Features
     [UsedImplicitly]
     public class MiniGamesAutoCompletion
     {
+        private const bool IsMiniGamesAutoCompletionEnabledDefault = true;
+        private const string CmdToggleMiniGamesAutoCompletionDefault = "t_gathering";
+
+        private static ConfigEntry<string> _cmdToggleMiniGamesAutoCompletion;
+        private static ConfigEntry<bool> _isMiniGamesAutoCompletionEnabled;
+
+        public static void Register(ConfigFile config)
+        {
+            _isMiniGamesAutoCompletionEnabled = config.Bind("General", "minigamesautocompletion_enabled", IsMiniGamesAutoCompletionEnabledDefault, "Enable mini-games auto-completion");
+
+            _cmdToggleMiniGamesAutoCompletion = config.Bind("Commands", "minigamesautocompletion_toggle", CmdToggleMiniGamesAutoCompletionDefault, "Toggle mini-games auto-completion");
+
+            CommandHandler.RegisterCommandsEvt += (_, _) =>
+            {
+                CommandHandler.TryAddCommand(PluginInfo.PLUGIN_NAME, ref _cmdToggleMiniGamesAutoCompletion);
+            };
+
+            CommandHandler.HandleCommandEvt += (_, command) =>
+            {
+                if (command.Name.Equals(_cmdToggleMiniGamesAutoCompletion.Value))
+                {
+                    _isMiniGamesAutoCompletionEnabled.Value = !_isMiniGamesAutoCompletionEnabled.Value;
+
+                    CommandHandler.DisplayMessage(
+                        $"Successfully {(_isMiniGamesAutoCompletionEnabled.Value ? "enabled" : "disabled")} mini-games auto-completion",
+                        PluginInfo.PLUGIN_NAME);
+                }
+            };
+        }
+
         [HarmonyPatch(typeof(ProfessionManager), "GatheringUpdateNew")]
         public class ProfessionManagerGatheringUpdateNewPatch
         {
@@ -17,7 +49,7 @@ namespace eradev.stolenrealm.BetterExploration.Features
                 PlayerMovement ___professionPlayer,
                 HexCell ___currentProfessionHex)
             {
-                if (!Options.IsMiniGamesAutoCompletionEnabled.Value)
+                if (!_isMiniGamesAutoCompletionEnabled.Value)
                 {
                     return true;
                 }
@@ -64,7 +96,7 @@ namespace eradev.stolenrealm.BetterExploration.Features
                 ref bool ___success,
                 ref bool ___perfectCatch)
             {
-                if (!Options.IsMiniGamesAutoCompletionEnabled.Value)
+                if (!_isMiniGamesAutoCompletionEnabled.Value)
                 {
                     return;
                 }
@@ -85,7 +117,7 @@ namespace eradev.stolenrealm.BetterExploration.Features
                 PlayerMovement ___professionPlayer,
                 HexCell ___currentProfessionHex)
             {
-                if (!Options.IsMiniGamesAutoCompletionEnabled.Value)
+                if (!_isMiniGamesAutoCompletionEnabled.Value)
                 {
                     return true;
                 }
