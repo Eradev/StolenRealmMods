@@ -50,6 +50,10 @@ Note: Duration only appear for the host.
 
 Handles chat commands from other mods.
 
+## Custom Music
+
+Replace the game's default music with yours.
+
 ## Free Respec
 
 Free respec.

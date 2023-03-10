@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheatDetector", "CheatDetec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterExploration", "BetterExploration\BetterExploration.csproj", "{A0574EB3-2E5D-4106-A92C-48B77DB3733C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomMusic", "CustomMusic\CustomMusic.csproj", "{94581238-FC1B-4BE3-B374-879232C43560}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{A0574EB3-2E5D-4106-A92C-48B77DB3733C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0574EB3-2E5D-4106-A92C-48B77DB3733C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0574EB3-2E5D-4106-A92C-48B77DB3733C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94581238-FC1B-4BE3-B374-879232C43560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94581238-FC1B-4BE3-B374-879232C43560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94581238-FC1B-4BE3-B374-879232C43560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94581238-FC1B-4BE3-B374-879232C43560}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
