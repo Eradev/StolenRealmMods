@@ -103,6 +103,11 @@ namespace eradev.stolenrealm.BetterTooltips
 
                 var selectedCharacter = GameLogic.instance.CurrentlySelectedCharacter;
 
+                if (selectedCharacter == null)
+                {
+                    return;
+                }
+
                 if (__instance.CurrentlyHoveringHexCell.HasEnemy(selectedCharacter))
                 {
                     // This is necessary or the tooltip will flicker. Cannot be put earlier or it will hide other tooltips.
@@ -435,7 +440,14 @@ namespace eradev.stolenrealm.BetterTooltips
 
             foreach (var actionSlot in actionSlots)
             {
-                actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
+                try
+                {
+                    actionSlot.RefreshActionSlot(actionSlot.ActionAndSkill);
+                }
+                catch
+                {
+                    // Do nothing
+                }
             }
         }
 
