@@ -26,6 +26,7 @@ namespace eradev.stolenrealm.CustomMusic
 
         private static ManualLogSource _log;
 
+        private static Coroutine _currentCoroutine;
         private static BgmType _currentBgmType;
         private static string _currentTerrainTimeKey;
 
@@ -68,7 +69,6 @@ namespace eradev.stolenrealm.CustomMusic
             [UsedImplicitly]
             private static void Postfix(
                 SoundManager __instance,
-                Dictionary<AudioSource, Coroutine> ___audioCoroutineDict,
                 AudioSource source,
                 AudioClip audioClip)
             {
@@ -76,7 +76,12 @@ namespace eradev.stolenrealm.CustomMusic
 
                 if (!source.loop && _currentBgmType is BgmType.Town or BgmType.Battle or BgmType.Exploration)
                 {
-                    ___audioCoroutineDict[source] = __instance.StartCoroutine(PlayRandomSongNext(source, audioClip));
+                    if (_currentCoroutine != null)
+                    {
+                        __instance.StopCoroutine(_currentCoroutine);
+                    }
+
+                    _currentCoroutine = __instance.StartCoroutine(PlayRandomSongNext(source, audioClip));
                 }
             }
         }
