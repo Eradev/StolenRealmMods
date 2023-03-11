@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -16,13 +18,13 @@ namespace eradev.stolenrealm.CustomMusic
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class CustomMusicPlugin : BaseUnityPlugin
     {
-        private static List<AudioClip> _townMusicFiles = new();
+        private static readonly List<AudioClip> _townMusicFiles = new();
         private static readonly Dictionary<string, List<AudioClip>> _battleMusicFiles = new();
         private static readonly Dictionary<string, List<AudioClip>> _explorationMusicFiles = new();
-        private static List<AudioClip> _genericBattleMusicFiles = new();
-        private static List<AudioClip> _genericExplorationMusicFiles = new();
-        private static List<AudioClip> _victoryMusicFiles = new();
-        private static List<AudioClip> _defeatMusicFiles = new();
+        private static readonly List<AudioClip> _genericBattleMusicFiles = new();
+        private static readonly List<AudioClip> _genericExplorationMusicFiles = new();
+        private static readonly List<AudioClip> _victoryMusicFiles = new();
+        private static readonly List<AudioClip> _defeatMusicFiles = new();
 
         private static ManualLogSource _log;
 
@@ -31,11 +33,15 @@ namespace eradev.stolenrealm.CustomMusic
         private static string _currentTerrainTimeKey;
 
         [UsedImplicitly]
-        private void Awake()
+        private async void Awake()
         {
             _log = Logger;
 
-            LoadAllAudioClips(GetFolderPath("Town"), ref _townMusicFiles);
+            new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
+
+            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+
+            await LoadAllAudioClipsAsync(GetFolderPath("Town"), _townMusicFiles);
 
             foreach (var terrainType in (TerrainType[])Enum.GetValues(typeof(TerrainType)))
             {
@@ -45,22 +51,18 @@ namespace eradev.stolenrealm.CustomMusic
 
                     var battleMusicList = new List<AudioClip>();
                     _battleMusicFiles.Add(key, battleMusicList);
-                    LoadAllAudioClips(GetFolderPath("Battle", $"{terrainType}", $"{timeOfDay}"), ref battleMusicList);
+                    await LoadAllAudioClipsAsync(GetFolderPath("Battle", $"{terrainType}", $"{timeOfDay}"), battleMusicList);
 
                     var explorationMusicList = new List<AudioClip>();
                     _explorationMusicFiles.Add(key, explorationMusicList);
-                    LoadAllAudioClips(GetFolderPath("Exploration", $"{terrainType}", $"{timeOfDay}"), ref explorationMusicList);
+                    await LoadAllAudioClipsAsync(GetFolderPath("Exploration", $"{terrainType}", $"{timeOfDay}"), explorationMusicList);
                 }
             }
 
-            LoadAllAudioClips(GetFolderPath("Battle", "Generic"), ref _genericBattleMusicFiles);
-            LoadAllAudioClips(GetFolderPath("Exploration", "Generic"), ref _genericExplorationMusicFiles);
-            LoadAllAudioClips(GetFolderPath("Victory"), ref _victoryMusicFiles);
-            LoadAllAudioClips(GetFolderPath("Defeat"), ref _defeatMusicFiles);
-
-            new Harmony(PluginInfo.PLUGIN_GUID).PatchAll();
-
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+            await LoadAllAudioClipsAsync(GetFolderPath("Battle", "Generic"), _genericBattleMusicFiles);
+            await LoadAllAudioClipsAsync(GetFolderPath("Exploration", "Generic"), _genericExplorationMusicFiles);
+            await LoadAllAudioClipsAsync(GetFolderPath("Victory"), _victoryMusicFiles);
+            await LoadAllAudioClipsAsync(GetFolderPath("Defeat"), _defeatMusicFiles);
         }
 
         [HarmonyPatch(typeof(SoundManager), "ExecuteFadeAudioIn")]
@@ -213,7 +215,7 @@ namespace eradev.stolenrealm.CustomMusic
             return defaultPath.AddRangeToArray(paths).Aggregate(Path.Combine);
         }
 
-        private void LoadAllAudioClips(string path, ref List<AudioClip> list)
+        private async Task LoadAllAudioClipsAsync(string path, List<AudioClip> list)
         {
             if (!Directory.Exists(path))
             {
@@ -225,17 +227,20 @@ namespace eradev.stolenrealm.CustomMusic
             foreach (var file in Directory.GetFiles(path).Where(x => x.EndsWith(".mp3", StringComparison.InvariantCultureIgnoreCase))
                          .ToList())
             {
-                StartCoroutine(GetAudioClip(file, list));
+                await GetAudioClipAsync(file, list);
             }
         }
 
-        private IEnumerator GetAudioClip(string path, List<AudioClip> list)
+        private async Task GetAudioClipAsync(string path, List<AudioClip> list)
         {
-            _log.LogDebug($"Trying to load audio file {path}");
+            var www = UnityWebRequestMultimedia.GetAudioClip(path, AudioType.MPEG);
 
-            using var www = UnityWebRequestMultimedia.GetAudioClip(path, AudioType.MPEG);
+            var operation = www.SendWebRequest();
 
-            yield return www.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
 
             if (www.result == UnityWebRequest.Result.ConnectionError)
             {
@@ -243,12 +248,20 @@ namespace eradev.stolenrealm.CustomMusic
             }
             else
             {
-                var audioClip = DownloadHandlerAudioClip.GetContent(www);
-                audioClip.name = Path.GetFileName(path);
+                new Thread(delegate()
+                {
+                    var audioClip = DownloadHandlerAudioClip.GetContent(www);
+                    www.Dispose();
 
-                list.Add(audioClip);
+                    var tagLib = TagLib.File.Create(path);
+                    audioClip.name =
+                        $"{string.Join(", ", tagLib.Tag.Performers)} - {tagLib.Tag.Title} // {tagLib.Properties.Duration:mm':'ss}";
+                    tagLib.Dispose();
 
-                _log.LogDebug($"Successfully loaded audio file {path}");
+                    list.Add(audioClip);
+
+                    _log.LogDebug($"Successfully loaded audio file {path}");
+                }).Start();
             }
         }
 
@@ -271,7 +284,7 @@ namespace eradev.stolenrealm.CustomMusic
 
             _log.LogDebug($"Queued audio file {randomAudioFile.name}");
 
-            yield return new WaitForSeconds(currentClip.length + 0.5f);
+            yield return new WaitForSeconds(currentClip.length);
 
             AccessTools
                 .Method(typeof(SoundManager), "FadeAudio")
@@ -282,12 +295,9 @@ namespace eradev.stolenrealm.CustomMusic
         {
             var computedList = _townMusicFiles.Where(x => x != current).ToList();
 
-            if (computedList.Any())
-            {
-                return computedList.Random();
-            }
-
-            return null;
+            return computedList.Any() 
+                ? computedList.Random()
+                : null;
         }
 
         private static AudioClip GetRandomBattleMusic(AudioClip current = null)
