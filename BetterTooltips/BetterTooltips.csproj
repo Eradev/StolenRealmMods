@@ -10,7 +10,7 @@
 * Displays info when the buff/debuff cannot be dispelled;
 * Displays who has the same Fortune and their current level;
 * Displays the current selected action in battle. (And clearer in the skillbar as well)</Description>
-    <Version>1.2.2</Version>
+    <Version>1.2.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>eradev.stolenrealm.BetterTooltips</RootNamespace>

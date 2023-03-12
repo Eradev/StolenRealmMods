@@ -37,7 +37,8 @@ namespace eradev.stolenrealm.BetterTooltips
             [UsedImplicitly]
             private static void Postfix(HexCellManager __instance)
             {
-                if (GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                if (GameLogic.instance.CurrentlyPlacingCharacters ||
+                    GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
                     __instance.CurrentState != PlayerState.Movement)
                 {
                     return;
@@ -63,6 +64,7 @@ namespace eradev.stolenrealm.BetterTooltips
                 var hexCellManager = HexCellManager.instance;
 
                 if (hexCellManager == null ||
+                    GameLogic.instance.CurrentlyPlacingCharacters ||
                     GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
                     hexCellManager.CurrentState != PlayerState.Action ||
                     hexCellManager.MyPlayer.CurrentAction == null)
@@ -94,7 +96,8 @@ namespace eradev.stolenrealm.BetterTooltips
             [UsedImplicitly]
             private static void Postfix(HexCellManager __instance)
             {
-                if (GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
+                if (GameLogic.instance.CurrentlyPlacingCharacters ||
+                    GUIManager.instance.CurrentGuiState != GUIState.InBattle ||
                     __instance.CurrentlyHoveringHexCell == null ||
                     CursorManager.instance.HoveringUseableObject)
                 {
