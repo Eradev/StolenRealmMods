@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using Burst2Flame;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -24,9 +24,13 @@ namespace eradev.stolenrealm.CommandHandlerNS
         private static ConfigEntry<string> _cmdSetCommandKey;
         private static ConfigEntry<string> _cmdFindSkill;
 
+        private static ManualLogSource _log;
+
         [UsedImplicitly]
         private void Awake()
         {
+            _log = Logger;
+
             _cmdKey = Config.Bind("General", "commandKey", CommandHandler.CommandKeyDefault.ToString(), "(char) Command key. Each command sent to the chat must start with this key. Cannot be alphanumeric or a whitespace");
 
             _cmdList = Config.Bind("Commands", "list", CmdListDefault, "List all available commands");
@@ -138,8 +142,8 @@ namespace eradev.stolenrealm.CommandHandlerNS
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
-        [HarmonyPatch(typeof(OptionsManager), "Start")]
-        public class OptionsManagerStartPatch
+        [HarmonyPatch(typeof(GameLogic), "Start")]
+        public class GameLogicStartPatch
         {
             [UsedImplicitly]
             private static void Postfix()
