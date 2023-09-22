@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
 using eradev.stolenrealm.CommandHandlerNS;
@@ -55,7 +54,7 @@ namespace eradev.stolenrealm.SkillPoints
                     {
                         refreshUnspentSkillPoints.Invoke(instanceControlledCharacter) = true;
                     }
-                    GUIManager.instance.UpdateUnspentPointsUI();
+                    GUIManager.instance.NeedsUpdateFromAttributeChanges = true;
 
                     CommandHandler.DisplayMessage($"Successfully set the skill points per level to {newValue}", PluginInfo.PLUGIN_NAME);
                 }
@@ -96,22 +95,6 @@ namespace eradev.stolenrealm.SkillPoints
                 ___unspentSkillPoints = skillPointsFromLevels + 3 - spentSkillPoints;
 
                 __result = ___unspentSkillPoints;
-            }
-        }
-
-        [HarmonyPatch(typeof(SkillRefundManager), "SelectedRefundCharacter", MethodType.Setter)]
-        public class SkillRefundManagerSelectedRefundCharacterPatch
-        {
-            [UsedImplicitly]
-            private static void Postfix(ref SkillRefundManager __instance)
-            {
-                var character = __instance.SelectedRefundCharacter;
-                var characterDetails = __instance.CharacterDetail;
-                var skillPointsFromLevels = (int)Math.Floor((character.Level - 1) * _skillPointsPerLevel.Value);
-
-                var skillPointsRegex = new Regex("Skill Points: \\d+");
-
-                characterDetails.text = skillPointsRegex.Replace(characterDetails.text, $"Skill Points: {skillPointsFromLevels + 3}");
             }
         }
     }

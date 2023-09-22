@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>eradev.stolenrealm.SkillPoints</AssemblyName>
     <Description>Configurable skill points per level.</Description>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>eradev.stolenrealm.SkillPoints</RootNamespace>
